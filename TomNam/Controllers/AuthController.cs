@@ -6,6 +6,8 @@ using System.Security.Claims;
 using System.Text;
 using TomNam.Models;
 using TomNam.Models.DTO;
+using System.Text.Json;
+
 
 [ApiController]
 [Route("api/[controller]")]
@@ -73,16 +75,39 @@ public class Auth : ControllerBase
             return BadRequest(new { message = "invalid credentials." });
         }
 
+        var userDto = new LoginResponse
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Id = user.Id,
+            Role = (await _userManager.GetRolesAsync(user))[0],
+            UserName = user.UserName,
+            Email = user.Email,
+            EmailConfirmed = user.EmailConfirmed,
+            PhoneNumber = user.PhoneNumber,
+            PhoneNumberConfirmed = user.PhoneNumberConfirmed,
+            TwoFactorEnabled = user.TwoFactorEnabled,
+        };
+
         var authClaims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim("User", JsonSerializer.Serialize(new 
+            {
+                userDto.FirstName,
+                userDto.LastName,
+                userDto.Id,
+                userDto.Role,
+                userDto.UserName,
+                userDto.Email,
+                userDto.EmailConfirmed,
+                userDto.PhoneNumber,
+                userDto.PhoneNumberConfirmed,
+                userDto.TwoFactorEnabled
+            }))
         };
 
         var token = GenerateJwtToken(authClaims);
 
-        // Create the response object
         var tokenResponse = new AccessTokenResponse
         {
             TokenType = "Bearer",
@@ -91,21 +116,7 @@ public class Auth : ControllerBase
             RefreshToken = null // Include logic for refresh token if needed
         };
 
-        var userDto = new LoginResponse
-        {
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            Id = user.Id,
-            UserName = user.UserName,
-            Email = user.Email,
-            EmailConfirmed = user.EmailConfirmed,
-            PhoneNumber = user.PhoneNumber,
-            PhoneNumberConfirmed = user.PhoneNumberConfirmed,
-            TwoFactorEnabled = user.TwoFactorEnabled,
-            Token = tokenResponse
-        };
-
-        return Ok(new { user = userDto });
+        return Ok(tokenResponse);
     }
 
     private JwtSecurityToken GenerateJwtToken(IEnumerable<Claim> authClaims)
