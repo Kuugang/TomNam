@@ -65,10 +65,6 @@ public class AuthController : ControllerBase
         {
             user = await _userManager.FindByEmailAsync(request.Email);
         }
-        else
-        {
-            user = _userManager.Users.SingleOrDefault(u => u.PhoneNumber == request.Phone);
-        }
 
         if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
         {
