@@ -4,7 +4,7 @@ namespace TomNam.Models.DTO
 {
     public enum Role
     {
-        User,
+        Customer,
         Owner,
     }
 
