@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -9,79 +11,86 @@ using System.Text.Json;
 using TomNam.Models;
 using TomNam.Models.DTO;
 using TomNam.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
+using TomNam.Helpers;
+using TomNam.Middlewares;
+using TomNam.Interfaces;
+using System.Diagnostics;
 
 
 [ApiController]
 [Route("api/karenderya")]
 
-public class KarenderyaController : ControllerBase 
+public class KarenderyaController : ControllerBase
 {
-	private readonly DataContext _context;
+    private readonly DataContext _context;
+    private readonly IUserService _userService;
 
-	public KarenderyaController(DataContext context)
-	{
-		_context = context;
-	}
+    public KarenderyaController(DataContext context, IUserService userService)
+    {
+        _context = context;
+        _userService = userService;
+    }
 
-	[HttpGet("{id}")]
-	public async Task<IActionResult> GetKarenderya([FromRoute] Guid id)
-	{
-		var karenderya = await _context.Karenderyas.FirstOrDefaultAsync(k => k.Id == id);
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetKarenderya([FromRoute] Guid id)
+    {
+        var karenderya = await _context.Karenderya.FirstOrDefaultAsync(k => k.Id == id);
 
-		if (karenderya == null)
-		{
-			return NotFound();  // Return 404 if not found
-		}
+        if (karenderya == null)
+        {
+            return NotFound();  // Return 404 if not found
+        }
 
-		return Ok(karenderya);  // Return the found Karenderya
-	}
+        return Ok(karenderya);  // Return the found Karenderya
+    }
 
-	// QUERY PARAMETERS
-	// api/karendera/?open=true&locationCity=Manila&locationProvince=Metro%20Manila
+    // QUERY PARAMETERS
+    // api/karendera/?open=true&locationCity=Manila&locationProvince=Metro%20Manila
 
-	// From Route
-	// api/karenderya/create/name/locationStreet/locationBarangay/locationCity/locationProvince/description/logoPhoto/coverPhoto
+    // From Route
+    // api/karenderya/create/name/locationStreet/locationBarangay/locationCity/locationProvince/description/logoPhoto/coverPhoto
 
-	// From Body
-	// api/karenderya/create 
-	// Response Body : {
-	//     "Name": "Karenderya Name",
-	//     "LocationStreet": "Location Street",
-	//     "LocationBarangay": "Location
-	// }
-	
-	// temp sol
-	private readonly UserManager<User> _userManager;
+    // From Body
+    // api/karenderya/create 
+    // Response Body : {
+    //     "Name": "Karenderya Name",
+    //     "LocationStreet": "Location Street",
+    //     "LocationBarangay": "Location
+    // }
 
-	[HttpPost("create")]
-	[Authorize(Roles = "Owner")] 
-	public async Task<IActionResult> CreateKarenderya([FromRoute] KarenderyaDTO.Create request){
-		User user = await _userManager.FindByEmailAsync("user@example.com");
-		
-		var karenderya = new Karenderya
-		{ 
-			// TODO: kuhaon si token para makuha si user and userid
-			
-			// temporary measure
-			UserId = user.Id,
-			User = user,
-			
-			Name = request.Name,
-			LocationStreet = request.LocationStreet,
-			LocationBarangay = request.LocationBarangay,
-			LocationCity = request.LocationCity,
-			LocationProvince = request.LocationProvince,
-			Description = request.Description,
-			DateFounded = DateOnly.FromDateTime(DateTime.Now),
-			LogoPhoto = request.LogoPhoto,
-			CoverPhoto = request.CoverPhoto
-		};
+    [HttpPost("create")]
+    // [Authorize]
+    public async Task<IActionResult> Create([FromBody] KarenderyaDTO.Create request)
+    {
+        var user = await JwtAuthenticationService.GetUserFromTokenAsync(User, _userService);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
 
-		await _context.Karenderyas.AddAsync(karenderya);
-		await _context.SaveChangesAsync();
+        if (user == null)
+        {
+            return Unauthorized(new { message = "Invalid or malformed token" });
+        }
 
-		return Ok(karenderya);
-	}
+        var karenderya = new Karenderya
+        {
+            UserId = user.Id,
+            User = user,
+            Name = request.Name,
+            LocationStreet = request.LocationStreet,
+            LocationBarangay = request.LocationBarangay,
+            LocationCity = request.LocationCity,
+            LocationProvince = request.LocationProvince,
+            Description = request.Description,
+            DateFounded = DateOnly.FromDateTime(DateTime.Now),
+            LogoPhoto = request.LogoPhoto,
+            CoverPhoto = request.CoverPhoto
+        };
+
+        await _context.Karenderya.AddAsync(karenderya);
+        await _context.SaveChangesAsync();
+
+        return Ok();
+    }
 }

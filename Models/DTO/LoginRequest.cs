@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+
 namespace TomNam.Models.DTO
 {
     public class LoginRequest

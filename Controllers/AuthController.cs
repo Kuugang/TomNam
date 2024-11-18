@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using TomNam.Models;
 using TomNam.Models.DTO;
+using TomNam.Middlewares;
 using System.Text.Json;
 
 
@@ -15,11 +16,13 @@ public class AuthController : ControllerBase
 {
     private readonly UserManager<User> _userManager;
     private readonly IConfiguration _configuration;
+    private readonly JwtAuthenticationService _jwtAuthenticationService;
 
-    public AuthController(UserManager<User> userManager, IConfiguration configuration)
+    public AuthController(UserManager<User> userManager, IConfiguration configuration, JwtAuthenticationService jwtAuthenticationService)
     {
         _userManager = userManager;
         _configuration = configuration;
+        _jwtAuthenticationService = jwtAuthenticationService;
     }
 
     [HttpPost("register")]
@@ -59,72 +62,17 @@ public class AuthController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        User user = null;
+        User? user = null;
 
-        if (request.Email != null)
+        user = await _userManager.FindByEmailAsync(request.Email);
+
+        if (user != null)
         {
-            user = await _userManager.FindByEmailAsync(request.Email);
+            var token = _jwtAuthenticationService.GenerateToken(user.Id, user.UserName, (await _userManager.GetRolesAsync(user))[0]);
+            return Ok(new { token });
         }
 
-        if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
-        {
-            return BadRequest(new { message = "invalid credentials." });
-        }
-
-        var userDto = new LoginResponse
-        {
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            Id = user.Id,
-            Role = (await _userManager.GetRolesAsync(user))[0],
-            UserName = user.UserName,
-            Email = user.Email,
-            EmailConfirmed = user.EmailConfirmed,
-            PhoneNumber = user.PhoneNumber,
-            PhoneNumberConfirmed = user.PhoneNumberConfirmed,
-            TwoFactorEnabled = user.TwoFactorEnabled,
-        };
-
-        var authClaims = new List<Claim>
-        {
-            new Claim("User", JsonSerializer.Serialize(new 
-            {
-                userDto.FirstName,
-                userDto.LastName,
-                userDto.Id,
-                userDto.UserName,
-                userDto.Email,
-                userDto.EmailConfirmed,
-                userDto.PhoneNumber,
-                userDto.PhoneNumberConfirmed,
-                userDto.TwoFactorEnabled
-            })),
-            new Claim(ClaimTypes.Role, userDto.Role),
-        };
-
-        var token = GenerateJwtToken(authClaims);
-
-        var tokenResponse = new AccessTokenResponse
-        {
-            TokenType = "Bearer",
-            AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
-            ExpiresIn = (long)(token.ValidTo - DateTime.UtcNow).TotalSeconds,
-            RefreshToken = null // TODO: Implement refresh token
-        };
-
-        return Ok(tokenResponse);
-    }
-
-    private JwtSecurityToken GenerateJwtToken(IEnumerable<Claim> authClaims)
-    {
-        var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-        return new JwtSecurityToken(
-            issuer: _configuration["JWT:ValidIssuer"],
-            audience: _configuration["JWT:ValidAudience"],
-            expires: DateTime.Now.AddHours(3),
-            claims: authClaims,
-            signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-        );
+        return BadRequest(new { message = "Invalid credentials." });
     }
 
     private string GetErrorsText(IEnumerable<IdentityError> errors)
