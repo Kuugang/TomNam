@@ -6,8 +6,6 @@ namespace TomNam.Models.DTO
 	{
 
 
-	  public class EditRequest
-	  {
 		[Required]
 		public required string KarenderyaId { get; set; } // uuid of karenderya
 		[Required]
@@ -23,7 +21,6 @@ namespace TomNam.Models.DTO
 		public string? Description { get; set; }
 		public string? LogoPhoto { get; set; }
 		public string? CoverPhoto { get; set; }
-	  }
 
 	  public class Create
 	  {
