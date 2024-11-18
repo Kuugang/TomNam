@@ -54,6 +54,8 @@ namespace TomNam
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
+
+
             .AddJwtBearer(options =>
             {
                 options.SaveToken = true;
@@ -67,6 +69,15 @@ namespace TomNam
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"])),
                     RoleClaimType = "Role"
                 };
+            });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("OwnerPolicy", policy =>
+                    policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", "Owner"));
+
+                options.AddPolicy("CustomerPolicy", policy =>
+                    policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", "Customer"));
             });
 
             // Enable Swagger for API documentation

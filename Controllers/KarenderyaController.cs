@@ -11,7 +11,6 @@ using System.Text.Json;
 using TomNam.Models;
 using TomNam.Models.DTO;
 using TomNam.Data;
-using TomNam.Helpers;
 using TomNam.Middlewares;
 using TomNam.Interfaces;
 using System.Diagnostics;
@@ -59,7 +58,7 @@ public class KarenderyaController : ControllerBase
     // }
 
     [HttpPost("create")]
-    // [Authorize]
+    [Authorize(Policy = "OwnerPolicy")]
     public async Task<IActionResult> Create([FromBody] KarenderyaDTO.Create request)
     {
         var user = await JwtAuthenticationService.GetUserFromTokenAsync(User, _userService);
