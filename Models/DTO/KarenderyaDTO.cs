@@ -43,6 +43,8 @@ namespace TomNam.Models.DTO
 		public class Create 
 		{
 			[Required]
+			public required string KarenderyaId { get; set; }
+			[Required]
 			public required string OwnerValidID1 { get; set; }
 			[Required]
 			public required string OwnerValidID2 { get; set; }

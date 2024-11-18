@@ -8,7 +8,7 @@ namespace TomNam.Models
 		public Guid Id { get; set; } = Guid.NewGuid();
 
 		[Required]
-		public required string KarenderyaId { get; set; }
+		public required Guid KarenderyaId { get; set; }
 
 		[Required]
 		[ForeignKey("KarenderyaId")]

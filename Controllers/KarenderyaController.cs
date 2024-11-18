@@ -14,6 +14,8 @@ using TomNam.Data;
 using TomNam.Middlewares;
 using TomNam.Interfaces;
 using System.Diagnostics;
+using Microsoft.VisualBasic;
+using Azure.Core;
 
 
 [ApiController]
@@ -88,21 +90,59 @@ public class KarenderyaController : ControllerBase
 		await _context.Karenderya.AddAsync(karenderya);
 		await _context.SaveChangesAsync();
 
-		[Required]
-		public required string KarenderyaId { get; set; } // uuid of karenderya
-		[Required]
-		public required string Name { get; set; }
-		[Required]
-		public required string LocationStreet { get; set; }
-		[Required]
-		public required string LocationBarangay { get; set; }
-		[Required]
-		public required string LocationCity { get; set; }
-		[Required]
-		public required string LocationProvince { get; set; }
-		public string? Description { get; set; }
-		public string? LogoPhoto { get; set; }
-		public string? CoverPhoto { get; set; }
+		// [Required]
+		// public required string KarenderyaId { get; set; } // uuid of karenderya
+		// [Required]
+		// public required string Name { get; set; }
+		// [Required]
+		// public required string LocationStreet { get; set; }
+		// [Required]
+		// public required string LocationBarangay { get; set; }
+		// [Required]
+		// public required string LocationCity { get; set; }
+		// [Required]
+		// public required string LocationProvince { get; set; }
+		// public string? Description { get; set; }
+		// public string? LogoPhoto { get; set; }
+		// public string? CoverPhoto { get; set; }
+		
+		
+		
+		return Ok(
+			new
+			{
+				karenderya.Id
+			}
+		);
+	}
+	
+	// [HttpPut("")]
+	// [Authorize(Policy = "OwnerPolicy")]
+	
+	// public async Task<IActionResult> Update([FromBody] KarenderyaDTO request)
+	// {
+	// 	var Karenderya = await
+	// }
+	
+	[HttpPost("create/proof")]
+	[Authorize(Policy = "OwnerPolicy")]
+	
+	public async Task<IActionResult> CreateProof([FromBody] ProofOfBusinessDTO.Create request)
+	{
+		Karenderya karenderya = await _context.Karenderya.FindAsync(request.KarenderyaId);
+		
+		var proof = new ProofOfBusiness
+		{
+			KarenderyaId = karenderya.Id,
+			Karenderya = karenderya,
+			OwnerValidID1 = request.OwnerValidID1,
+			OwnerValidID2 = request.OwnerValidID2,
+			BusinessPermit = request.BusinessPermit,
+			BIRPermit = request.BIRPermit
+		};
+		
+		await _context.ProofOfBusiness.AddAsync(proof);
+		await _context.SaveChangesAsync();
 		
 		return Ok();
 	}
