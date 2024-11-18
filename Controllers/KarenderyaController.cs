@@ -51,10 +51,15 @@ public class KarenderyaController : ControllerBase
 	//     "LocationStreet": "Location Street",
 	//     "LocationBarangay": "Location
 	// }
+	
+	// temp sol
+	private readonly UserManager<User> _userManager;
 
 	[HttpPost("create")]
 	[Authorize(Roles = "Owner")] 
-	public async Task<IActionResult> CreateKarenderya([FromRoute] KarenderyaDTO.Create request, User user){ // temporary measure para dili mag error
+	public async Task<IActionResult> CreateKarenderya([FromRoute] KarenderyaDTO.Create request){
+		User user = await _userManager.FindByEmailAsync("user@example.com");
+		
 		var karenderya = new Karenderya
 		{ 
 			// TODO: kuhaon si token para makuha si user and userid
