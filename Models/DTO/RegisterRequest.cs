@@ -30,6 +30,6 @@ namespace TomNam.Models.DTO
 
         [Required]
         [EnumDataType(typeof(Role), ErrorMessage = "User Role must be either 'User', or 'Owner'")]
-        public string UserRole{ get; set; }
+        public required string UserRole{ get; set; }
     }
 }
