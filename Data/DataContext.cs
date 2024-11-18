@@ -11,7 +11,7 @@ namespace TomNam.Data
 
         }
 
-        public DbSet<Karenderya> Karenderyas { get; set; }
+        public DbSet<Karenderya> Karenderya { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

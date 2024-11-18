@@ -1,15 +1,18 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TomNam.Models.DTO 
+namespace TomNam.Models.DTO
 {
-	public class KarenderyaDTO{
-	
+    public class KarenderyaDTO
+    {
 
-		public class EditRequest{
 
-		}
-		
-		public class Create{
+        public class EditRequest
+        {
+
+        }
+
+        public class Create
+        {
             [Required]
             public required string Name { get; set; }
             [Required]
@@ -23,6 +26,6 @@ namespace TomNam.Models.DTO
             public string? Description { get; set; }
             public string? LogoPhoto { get; set; }
             public string? CoverPhoto { get; set; }
-		}
-	}
+        }
+    }
 }
