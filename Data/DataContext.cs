@@ -38,6 +38,11 @@ namespace TomNam.Data
 			   .Property(p => p.Rating)
 			   .HasPrecision(1, 2)
 			   .HasDefaultValue(0.00); 
+			   
+			modelBuilder.Entity<ProofOfBusiness>()
+				.HasOne(p => p.Karenderya)
+				.WithOne(k => k.proofOfBusiness)
+				.HasForeignKey<ProofOfBusiness>(p => p.KarenderyaId);  // ProofOfBusiness has one User
 		}
 	}
 }

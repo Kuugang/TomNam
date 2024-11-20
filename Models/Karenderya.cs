@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace TomNam.Models
 {
@@ -48,6 +49,7 @@ namespace TomNam.Models
 
 		public double? Rating { get; set; }
 		
+		[JsonIgnore] // To avoid circular references
 		public ProofOfBusiness? proofOfBusiness { get; set; }
 	}
 }
