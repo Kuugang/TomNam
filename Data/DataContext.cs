@@ -13,6 +13,7 @@ namespace TomNam.Data
 
 		public DbSet<Karenderya> Karenderya { get; set; }
 		public DbSet<ProofOfBusiness> ProofOfBusiness { get; set; }
+		public DbSet<Food> Food { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
