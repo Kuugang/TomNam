@@ -31,7 +31,7 @@ namespace TomNam
             services.AddControllers();
             services.AddSingleton<JwtAuthenticationService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IUploadService, UploadService>();
+            services.AddScoped<IFileUploadService, FileUploadService>();
 
             // Configure Entity Framework with PostgreSQL
             services.AddDbContext<DataContext>(options =>
@@ -93,6 +93,8 @@ namespace TomNam
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TomNam v1"));
             }
+            // Register JwtAuthenticationService as middleware
+            app.UseMiddleware<JwtAuthenticationService>();
 
             app.UseStaticFiles(new StaticFileOptions
             {
@@ -100,8 +102,6 @@ namespace TomNam
                 RequestPath = "/Uploads"
             });
 
-            // Register JwtAuthenticationService as middleware
-            app.UseMiddleware<JwtAuthenticationService>();
 
             app.UseHttpsRedirection();
             app.UseRouting();

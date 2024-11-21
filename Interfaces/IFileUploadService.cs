@@ -1,6 +1,6 @@
 using TomNam.Models;
 namespace TomNam.Interfaces{
-    public interface IUploadService
+    public interface IFileUploadService
     {
         public string Upload(IFormFile file, string UploadPath);
     }

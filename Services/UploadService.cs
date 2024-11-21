@@ -6,7 +6,7 @@ using TomNam.Interfaces;
 
 namespace TomNam.Services{
 
-    public class UploadService : IUploadService{
+    public class FileUploadService : IFileUploadService{
         public string Upload(IFormFile file, string UploadPath){
             // extension
             List<string> ValidExtensions = new List<string>() {".jpg", ".jpeg", ".png", ".gif", ".pdf"};
@@ -29,7 +29,7 @@ namespace TomNam.Services{
             using FileStream stream = new FileStream(FullPath, FileMode.Create);
 
             file.CopyTo(stream);
-            return RelativePath + fileName;
+            return Path.Combine(RelativePath, fileName);
         }
     }
 }

@@ -19,10 +19,10 @@ public class KarenderyasController : ControllerBase
 {
 	private readonly DataContext _context;
 	private readonly IUserService _userService;
-    private readonly IUploadService _uploadService;
+    private readonly IFileUploadService _uploadService;
 	private readonly UserManager<User> _userManager;
 
-	public KarenderyasController(DataContext context, IUserService userService, IUploadService uploadService, UserManager<User> userManager)
+	public KarenderyasController(DataContext context, IUserService userService, IFileUploadService uploadService, UserManager<User> userManager)
 	{
 		_context = context;
 		_userService = userService;
