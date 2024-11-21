@@ -22,8 +22,8 @@ namespace TomNam.Models.DTO
 			public string? LocationProvince { get; set; }
 			public DateOnly? DateFounded { get; set; }
 			public string? Description { get; set; }
-			public string? LogoPhoto { get; set; }
-			public string? CoverPhoto { get; set; }
+			public IFormFile? LogoPhoto { get; set; }
+			public IFormFile? CoverPhoto { get; set; }
 		}
 
 		public class Create
