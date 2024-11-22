@@ -12,9 +12,9 @@ using TomNam.Models.DTO;
 using TomNam.Middlewares;
 using TomNam.Middlewares.Filters;
 
-
 [ApiController]
 [Route("api/auth")]
+[ValidateModelAttribute]
 public class AuthController : ControllerBase
 {
     private readonly UserManager<User> _userManager;
@@ -37,7 +37,10 @@ public class AuthController : ControllerBase
         if (userByEmail != null)
         {
             return StatusCode(StatusCodes.Status409Conflict,
-                new ResponseDTO { Message = $"User with email {request.Email} already exists." }
+                new ErrorResponseDTO { 
+                    Message = "Registration failed",
+                    Error = $"User with email {request.Email} already exists." 
+                }
             );
         }
 
@@ -53,10 +56,13 @@ public class AuthController : ControllerBase
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
+            var errors = result.Errors.Select(e => e.Description).ToList();
+
             return StatusCode(StatusCodes.Status500InternalServerError, 
-                new ResponseDTO
+                new ErrorResponseDTO
                 {
-                    Message = "Something went wrong with user creation. Please try again",
+                    Message = "Registration failed",
+                    Error = errors
                 }
             );
         }
@@ -87,7 +93,7 @@ public class AuthController : ControllerBase
 		await _context.SaveChangesAsync();
         
         return StatusCode(StatusCodes.Status201Created,
-            new ResponseDTO
+            new SuccessResponseDTO
             {
                 Message = "User created successfully",
                 Data = new JWTDTO {
@@ -96,41 +102,31 @@ public class AuthController : ControllerBase
             }
         );
     }
-
     [HttpPost("login")]
-    [ValidateModel]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        // if (!ModelState.IsValid)
-        // {
-        //     // return BadRequest(new { message = "Invalid request." });
-        //     // custom response
-        // }
-
         User? user = null;
 
         user = await _userManager.FindByEmailAsync(request.Email);
 
-        if (user != null)
-        {
-            var token = _jwtAuthenticationService.GenerateToken(user.Id, user.UserName, (await _userManager.GetRolesAsync(user))[0]);
-            Console.WriteLine(token.GetType());
-            Console.WriteLine(token);
-
-            return Ok(
-                new ResponseDTO
+        if (user == null){
+            return StatusCode(StatusCodes.Status401Unauthorized,
+                new ErrorResponseDTO
                 {
-                    Message = "Login successful",
-                    Data = new JWTDTO { Token = token }
+                    Message = "Login failed",
+                    Error = "Invalid credentials."
                 }
             );
         }
 
-        return BadRequest(new { message = "Invalid credentials." });
-    }
+        var token = _jwtAuthenticationService.GenerateToken(user.Id, user.UserName, (await _userManager.GetRolesAsync(user))[0]);
 
-    private string GetErrorsText(IEnumerable<IdentityError> errors)
-    {
-        return string.Join(", ", errors.Select(error => error.Description));
+        return Ok(
+            new SuccessResponseDTO
+            {
+                Message = "Login successful",
+                Data = new JWTDTO { Token = token }
+            }
+        );
     }
 }
