@@ -25,30 +25,34 @@ public class FoodController : ControllerBase {
 
     [HttpPost("{karenderyaId}")]
     [Authorize(Policy="OwnerPolicy")]
-    public async Task<IActionResult> Create([FromBody] FoodDTO request,[FromRoute] Guid karenderyaId,[FromQuery] FoodDTO search){
+    public async Task<IActionResult> Create([FromBody] FoodDTO request,[FromRoute] Guid karenderyaId){
         var UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         
         if (UserId == null) {
             return NotFound(new { message = "User not found" });
         }
 
-        var Karenderya = await _context.Karenderya.FirstOrDefaultAsync(k => k.Id == karenderyaId && k.UserId == UserId);
+        var Karen = await _context.Karenderya.FirstOrDefaultAsync(k => k.Id == karenderyaId && k.UserId == UserId);
 
-        if (Karenderya == null) {
+        if (Karen == null) {
             return NotFound(new { message = "Karenderya not found" });
         }
         
-        // TODO: unique food names. 
-        // var foodName = await _context.Food.SingleOrDefaultAsync(f => f.FoodName == request.FoodName);
-        // if(foodName)
+        // unique food names. 
+        var foodCount = await _context.Food.CountAsync(f => f.FoodName == request.FoodName);
+        if (foodCount >= 1)
+        {
+            return Conflict(new { message = "Food name already exists" });
+        }
 
         var Food = new Food {
-            KarenderyaId = Karenderya.Id,
-            Karenderya = Karenderya,
+            KarenderyaId = Karen.Id,
+            Karenderya = Karen,
             FoodName = request.FoodName,
             FoodDescription = (request.FoodDescription == null) ? "" : request.FoodDescription,
             UnitPrice = request.UnitPrice,
             FoodPhoto = request.FoodPhoto
+        
         };
 
         await _context.Food.AddAsync(Food);
@@ -70,7 +74,7 @@ public class FoodController : ControllerBase {
         return Ok(food);
     }
 
-    // search food
+    // search food at karenderya
     [HttpGet()]
     public async Task<IActionResult> GetFromSearch([FromQuery] FoodDTO search){
         var query = _context.Food.AsQueryable();
@@ -84,6 +88,66 @@ public class FoodController : ControllerBase {
             return NotFound(new { message = "Food not found" });
         }
 
-        return Ok(foodlist);
+        return Ok(new {message = "Search success", data = foodlist });
+    }
+
+    //TODO: di mo gana. 415
+    [HttpPut("{FoodId}/update")]
+    [Authorize(Policy="OwnerPolicy")]
+    public async Task<IActionResult> Update([FromRoute] Guid FoodId, [FromBody] FoodDTO request){
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var food = await _context.Food.FirstOrDefaultAsync(f => f.Id == FoodId);
+
+        if (food == null) {
+            return NotFound(new { message = "Food not found" });
+        }
+
+        if (userId != food.Karenderya.UserId) {
+            return Unauthorized(new { message = "You are not the owner of this karenderya" });
+        }
+
+        // Update food but nanuon nlng kos karenderya update pud
+        if(request.FoodName != null) {
+            food.FoodName = request.FoodName;
+        } if(request.FoodDescription != null) {
+            food.FoodDescription = request.FoodDescription;
+        } if(request.UnitPrice != food.UnitPrice) {
+            food.UnitPrice = request.UnitPrice;
+        } 
+        
+        // //TODO: 
+        // if(request.FoodPhoto != null) {
+        //     food.FoodPhoto = request.FoodPhoto;
+        // }
+
+        await _context.SaveChangesAsync();
+
+        return Ok(food);
+    }
+
+    [HttpDelete("{FoodId}/delete")]
+    [Authorize(Policy="OwnerPolicy")]
+    public async Task<IActionResult> Delete([FromRoute] Guid FoodId){
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var food = await _context.Food.FirstOrDefaultAsync(f => f.Id == FoodId);
+
+        if (food == null) {
+            return NotFound(new { message = "Food not found" });
+        }
+        
+        var karenderya = await _context.Karenderya.FirstOrDefaultAsync(k => k.Id == food.KarenderyaId);
+
+        if(karenderya == null) {
+            return NotFound(new { message = "Karenderya not found" });
+        }
+
+        // TODO: mo null sya diri dapita??
+        if (userId != karenderya.UserId) {
+            return Unauthorized(new { message = "You are not the owner of this karenderya" });
+        }
+
+        _context.Food.Remove(food);
+        await _context.SaveChangesAsync();
+        return Ok(new { message = "Food deleted successfully" });
     }
 }
