@@ -25,7 +25,7 @@ public class FoodController : ControllerBase {
 
     [HttpPost("{karenderyaId}")]
     [Authorize(Policy="OwnerPolicy")]
-    public async Task<IActionResult> Create([FromBody] FoodDTO request,[FromRoute] Guid karenderyaId){
+    public async Task<IActionResult> Create([FromBody] FoodDTO.CreateFood request,[FromRoute] Guid karenderyaId){
         var UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         
         if (UserId == null) {
@@ -58,12 +58,11 @@ public class FoodController : ControllerBase {
         await _context.Food.AddAsync(Food);
         await _context.SaveChangesAsync();
 
-        return Ok(Food);
-
+        return CreatedAtRoute("GetFoodById", new { foodId = Food.Id },Food);
     }
 
     // get by id ra
-    [HttpGet("{FoodId}")]
+    [HttpGet("{foodId}", Name = "GetFoodById")]
     public async Task<IActionResult> Get([FromRoute] Guid FoodId){
         var food = await _context.Food.SingleOrDefaultAsync(f => f.Id == FoodId);
     
@@ -71,12 +70,12 @@ public class FoodController : ControllerBase {
             return NotFound(new { message = "Food not found" });
         }
 
-        return Ok(food);
+        return Ok(new {message = "Search success", data = food });
     }
 
     // search food at karenderya
     [HttpGet()]
-    public async Task<IActionResult> GetFromSearch([FromQuery] FoodDTO search){
+    public async Task<IActionResult> GetFromSearch([FromQuery] FoodDTO.ReadUpdateFood search){
         var query = _context.Food.AsQueryable();
     
         if(search.FoodName != null) {
@@ -94,7 +93,7 @@ public class FoodController : ControllerBase {
     //TODO: di mo gana. 415
     [HttpPut("{FoodId}/update")]
     [Authorize(Policy="OwnerPolicy")]
-    public async Task<IActionResult> Update([FromRoute] Guid FoodId, [FromBody] FoodDTO request){
+    public async Task<IActionResult> Update([FromRoute] Guid FoodId, [FromForm] FoodDTO.ReadUpdateFood request){
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var food = await _context.Food.FirstOrDefaultAsync(f => f.Id == FoodId);
 
@@ -102,7 +101,14 @@ public class FoodController : ControllerBase {
             return NotFound(new { message = "Food not found" });
         }
 
-        if (userId != food.Karenderya.UserId) {
+        var karenderya = await _context.Karenderya.FirstOrDefaultAsync(k => k.Id == food.KarenderyaId);
+
+        if(karenderya == null) {
+            return NotFound(new { message = "Karenderya not found" });
+        }
+
+        // TODO: mo null sya diri dapita??
+        if (userId != karenderya.UserId) {
             return Unauthorized(new { message = "You are not the owner of this karenderya" });
         }
 
