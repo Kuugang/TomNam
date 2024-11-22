@@ -9,6 +9,7 @@ using TomNam.Models.DTO;
 using TomNam.Data;
 using TomNam.Middlewares;
 using TomNam.Interfaces;
+using TomNam.Services;
 
 
 [ApiController]
@@ -18,12 +19,14 @@ public class KarenderyasController : ControllerBase
 {
 	private readonly DataContext _context;
 	private readonly IUserService _userService;
+    private readonly IFileUploadService _uploadService;
 	private readonly UserManager<User> _userManager;
 
-	public KarenderyasController(DataContext context, IUserService userService, UserManager<User> userManager)
+	public KarenderyasController(DataContext context, IUserService userService, IFileUploadService uploadService, UserManager<User> userManager)
 	{
 		_context = context;
 		_userService = userService;
+        _uploadService = uploadService;
 		_userManager = userManager;
 	}
 
@@ -121,7 +124,7 @@ public class KarenderyasController : ControllerBase
 	
 	[HttpPut("{karenderyaId}/update")]
 	[Authorize(Policy = "OwnerPolicy")]
-	public async Task<IActionResult> Update([FromRoute] Guid karenderyaId, [FromBody] KarenderyaRequestDTO.Update request)
+	public async Task<IActionResult> Update([FromRoute] Guid karenderyaId, [FromForm] KarenderyaRequestDTO.Update request)
 	{
 		var karenderya = await _context.Karenderya.FirstOrDefaultAsync(k => k.Id == karenderyaId);
 		
@@ -156,11 +159,15 @@ public class KarenderyasController : ControllerBase
 		if (request.Description != null)
 			karenderya.Description = request.Description;
 
-		if (request.LogoPhoto != null)
-			karenderya.LogoPhoto = request.LogoPhoto;
+		if (request.LogoPhoto != null){
+            string LogoPath = _uploadService.Upload(request.LogoPhoto, "Karenderya\\Logo");
+			karenderya.LogoPhoto = LogoPath;
+        }
 
-		if (request.CoverPhoto != null)
-			karenderya.CoverPhoto = request.CoverPhoto;
+		if (request.CoverPhoto != null){
+            string CoverPhotoPath = _uploadService.Upload(request.CoverPhoto, "Karenderya\\Cover");
+			karenderya.CoverPhoto = CoverPhotoPath;
+        }
 		
 		// Save changes to the database
 		await _context.SaveChangesAsync();
