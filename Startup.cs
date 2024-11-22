@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using TomNam.Data;
 using TomNam.Models;
 using TomNam.Middlewares;
+using TomNam.Middlewares.Filters;
 using TomNam.Interfaces;
 using TomNam.Services;
 
@@ -29,7 +30,12 @@ namespace TomNam
         public IConfiguration Configuration { get; }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+
+            services.AddControllers(options =>
+            {
+                options.Filters.Add<ValidateModelAttribute>();
+            });
+
             services.AddSingleton<JwtAuthenticationService>();
             services.AddScoped<IUserService, UserService>();
 

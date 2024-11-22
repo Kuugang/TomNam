@@ -15,8 +15,8 @@ namespace TomNam.Models
 		[ForeignKey("UserId")]
 		public required User User { get; set; }
 
-		[Required]
-		[MaxLength(50)]
+		
+		
 		public required string Name { get; set; }
 
 		[Required]
