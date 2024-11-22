@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace TomNam.Models.DTO
 {
-    public class ResponseDTO
+    public class ErrorResponseDTO
     {
         public string? Message { get; set; }
-        public object Data { get; set; }
+        public object Error { get; set; }
     }
 }
