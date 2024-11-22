@@ -11,6 +11,8 @@ namespace TomNam.Data
 
 		}
 
+        public DbSet<CustomerProfile> CustomerProfile { get; set; }
+        public DbSet<OwnerProfile> OwnerProfile { get; set; }
 		public DbSet<Karenderya> Karenderya { get; set; }
 		public DbSet<ProofOfBusiness> ProofOfBusiness { get; set; }
 
