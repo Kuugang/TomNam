@@ -1,7 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
-using TomNam.Models;
-using TomNam.Data;
 using TomNam.Interfaces;
 
 namespace TomNam.Services{
