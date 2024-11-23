@@ -109,7 +109,7 @@ public class AuthController : ControllerBase
 
         user = await _userManager.FindByEmailAsync(request.Email);
 
-        if (user == null){
+        if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password)){
             return StatusCode(StatusCodes.Status401Unauthorized,
                 new ErrorResponseDTO
                 {
