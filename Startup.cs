@@ -1,13 +1,17 @@
+using System;
 using System.Text;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+using Microsoft.AspNetCore.Mvc;
 
 using TomNam.Data;
 using TomNam.Models;
 using TomNam.Middlewares;
+using TomNam.Middlewares.Filters;
 using TomNam.Interfaces;
 using TomNam.Services;
 
@@ -28,10 +32,21 @@ namespace TomNam
         public IConfiguration Configuration { get; }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+
+            services.AddControllers(options =>
+            {
+                // options.ModelMetadataDetailsProviders.Add(new SystemTextJsonValidationMetadataProvider());
+                options.Filters.Add<ValidateModelAttribute>();
+            });
+
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
+
+
             services.AddSingleton<JwtAuthenticationService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IFileUploadService, FileUploadService>();
 
             // Configure Entity Framework with PostgreSQL
             services.AddDbContext<DataContext>(options =>
@@ -78,7 +93,6 @@ namespace TomNam
 
                 options.AddPolicy("CustomerPolicy", policy =>
                     policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", "Customer"));
-
             });
 
             // Enable Swagger for API documentation
@@ -93,15 +107,9 @@ namespace TomNam
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TomNam v1"));
             }
+
             // Register JwtAuthenticationService as middleware
             app.UseMiddleware<JwtAuthenticationService>();
-
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Uploads")),
-                RequestPath = "/Uploads"
-            });
-
 
             app.UseHttpsRedirection();
             app.UseRouting();

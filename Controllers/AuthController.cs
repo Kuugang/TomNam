@@ -4,25 +4,30 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
+
+using TomNam.Data;
 using TomNam.Models;
 using TomNam.Models.DTO;
 using TomNam.Middlewares;
-using System.Text.Json;
-
+using TomNam.Middlewares.Filters;
 
 [ApiController]
 [Route("api/auth")]
+[ValidateModelAttribute]
 public class AuthController : ControllerBase
 {
     private readonly UserManager<User> _userManager;
     private readonly IConfiguration _configuration;
     private readonly JwtAuthenticationService _jwtAuthenticationService;
+    private readonly DataContext _context;
 
-    public AuthController(UserManager<User> userManager, IConfiguration configuration, JwtAuthenticationService jwtAuthenticationService)
+    public AuthController(UserManager<User> userManager, IConfiguration configuration, JwtAuthenticationService jwtAuthenticationService, DataContext context)
     {
         _userManager = userManager;
         _configuration = configuration;
         _jwtAuthenticationService = jwtAuthenticationService;
+        _context = context;
     }
 
     [HttpPost("register")]
@@ -31,7 +36,12 @@ public class AuthController : ControllerBase
         var userByEmail = await _userManager.FindByEmailAsync(request.Email);
         if (userByEmail != null)
         {
-            return BadRequest($"User with email {request.Email} already exists.");
+            return StatusCode(StatusCodes.Status409Conflict,
+                new ErrorResponseDTO { 
+                    Message = "Registration failed",
+                    Error = $"User with email {request.Email} already exists." 
+                }
+            );
         }
 
         var user = new User
@@ -46,37 +56,77 @@ public class AuthController : ControllerBase
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                $"Unable to register user {request.Email}: {GetErrorsText(result.Errors)}");
+            var errors = result.Errors.Select(e => e.Description).ToList();
+
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                new ErrorResponseDTO
+                {
+                    Message = "Registration failed",
+                    Error = errors
+                }
+            );
         }
 
         await _userManager.AddToRoleAsync(user, (request.UserRole).ToString());
-        return Ok(new { message = "Registration successful" });
-    }
 
+        switch (request.UserRole)
+        {
+            case "Customer":
+                CustomerProfile CustomerProfile = new CustomerProfile
+                {
+                    UserId = user.Id,
+                    User = user,
+                    BehaviorScore = 30
+                };
+		        await _context.CustomerProfile.AddAsync(CustomerProfile);
+                break;
+            case "Owner":
+                OwnerProfile OwnerProfile = new OwnerProfile
+                {
+                    UserId = user.Id,
+                    User = user
+                };
+		        await _context.OwnerProfile.AddAsync(OwnerProfile);
+                break;
+        }
+
+		await _context.SaveChangesAsync();
+        
+        return StatusCode(StatusCodes.Status201Created,
+            new SuccessResponseDTO
+            {
+                Message = "User created successfully",
+                Data = new JWTDTO {
+                    Token = _jwtAuthenticationService.GenerateToken(user.Id, user.UserName, (await _userManager.GetRolesAsync(user))[0])
+                }
+            }
+        );
+    }
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
         User? user = null;
 
         user = await _userManager.FindByEmailAsync(request.Email);
 
-        if (user != null)
-        {
-            var token = _jwtAuthenticationService.GenerateToken(user.Id, user.UserName, (await _userManager.GetRolesAsync(user))[0]);
-            return Ok(new { token });
+        if (user == null){
+            return StatusCode(StatusCodes.Status401Unauthorized,
+                new ErrorResponseDTO
+                {
+                    Message = "Login failed",
+                    Error = "Invalid credentials."
+                }
+            );
         }
 
-        return BadRequest(new { message = "Invalid credentials." });
-    }
+        var token = _jwtAuthenticationService.GenerateToken(user.Id, user.UserName, (await _userManager.GetRolesAsync(user))[0]);
 
-    private string GetErrorsText(IEnumerable<IdentityError> errors)
-    {
-        return string.Join(", ", errors.Select(error => error.Description));
+        return Ok(
+            new SuccessResponseDTO
+            {
+                Message = "Login successful",
+                Data = new JWTDTO { Token = token }
+            }
+        );
     }
 }
