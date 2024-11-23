@@ -174,6 +174,37 @@ namespace TomNam.Migrations
                     b.ToTable("CustomerProfile");
                 });
 
+            modelBuilder.Entity("TomNam.Models.Food", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FoodDescription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FoodName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FoodPhoto")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<Guid>("KarenderyaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("UnitPrice")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KarenderyaId");
+
+                    b.ToTable("Food");
+                });
+
             modelBuilder.Entity("TomNam.Models.Karenderya", b =>
                 {
                     b.Property<Guid>("Id")
@@ -457,6 +488,17 @@ namespace TomNam.Migrations
                     b.Navigation("Karenderya");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TomNam.Models.Food", b =>
+                {
+                    b.HasOne("TomNam.Models.Karenderya", "Karenderya")
+                        .WithMany()
+                        .HasForeignKey("KarenderyaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Karenderya");
                 });
 
             modelBuilder.Entity("TomNam.Models.ProofOfBusiness", b =>
