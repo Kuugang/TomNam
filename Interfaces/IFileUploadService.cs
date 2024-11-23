@@ -1,4 +1,3 @@
-using TomNam.Models;
 namespace TomNam.Interfaces{
     public interface IFileUploadService
     {
