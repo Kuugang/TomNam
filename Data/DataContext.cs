@@ -11,8 +11,8 @@ namespace TomNam.Data
 
 		}
 
-        public DbSet<CustomerProfile> CustomerProfile { get; set; }
-        public DbSet<OwnerProfile> OwnerProfile { get; set; }
+		public DbSet<CustomerProfile> CustomerProfile { get; set; }
+		public DbSet<OwnerProfile> OwnerProfile { get; set; }
 		public DbSet<Karenderya> Karenderya { get; set; }
 		public DbSet<ProofOfBusiness> ProofOfBusiness { get; set; }
 		public DbSet<Food> Food { get; set; }
@@ -36,8 +36,12 @@ namespace TomNam.Data
 			modelBuilder.Entity<Karenderya>()
 				.HasIndex(k => k.UserId)  // Make sure the foreign key is unique (1-to-1 relationship)
 				.IsUnique();
-
+				
 			modelBuilder.Entity<Karenderya>()
+				.Property(p => p.IsVerified)
+				.HasDefaultValue(false); // Sets the isVerified property to false by default
+
+			modelBuilder.Entity<Karenderya>() // Sets the karenderya rating to 0
 			   .Property(p => p.Rating)
 			   .HasPrecision(1, 2)
 			   .HasDefaultValue(0.00); 

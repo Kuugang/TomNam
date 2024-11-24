@@ -24,6 +24,7 @@ namespace TomNam.Models.DTO
 			public string? Description { get; set; }
 			public IFormFile? LogoPhoto { get; set; }
 			public IFormFile? CoverPhoto { get; set; }
+			public bool? IsVerified { get; set; }
 		}
 
 		public class Create
@@ -46,27 +47,28 @@ namespace TomNam.Models.DTO
 		public class ProofOfBusinessCreateDTO 
 		{
 			[Required]
-			public required string OwnerValidID1 { get; set; }
+			public required IFormFile OwnerValidID1 { get; set; }
 			[Required]
-			public required string OwnerValidID2 { get; set; }
+			public required IFormFile OwnerValidID2 { get; set; }
 			[Required]
-			public required string BusinessPermit { get; set; }
+			public required IFormFile BusinessPermit { get; set; }
 			[Required]
-			public required string BIRPermit { get; set; }
+			public required IFormFile BIRPermit { get; set; }
 		}
 		
 		public class ProofOfBusinessUpdateDTO 
 		{
-			public string? OwnerValidID1 { get; set; }
-			public string? OwnerValidID2 { get; set; }
-			public string? BusinessPermit { get; set; }
-			public string? BIRPermit { get; set; }
+			public IFormFile? OwnerValidID1 { get; set; }
+			public IFormFile? OwnerValidID2 { get; set; }
+			public IFormFile? BusinessPermit { get; set; }
+			public IFormFile? BIRPermit { get; set; }
 		}
 	}
 	
 	public class KarenderyaResponseDTO 
 	{
 		public Guid? Id { get; set; } // uuid of karenderya
+		public string? UserId { get; set; } // uuid of karenderya owner
 		public string? Name { get; set; }
 		public string? LocationStreet { get; set; }
 		public string? LocationBarangay { get; set; }
@@ -76,5 +78,15 @@ namespace TomNam.Models.DTO
 		public string? Description { get; set; }
 		public string? LogoPhoto { get; set; }
 		public string? CoverPhoto { get; set; }
+		public bool? IsVerified { get; set; }
+		
+		public class ProofOfBusiness 
+		{
+			public Guid? Id { get; set; } // uuid of proof of business
+			public string? OwnerValidID1 { get; set; }
+			public string? OwnerValidID2 { get; set; }
+			public string? BusinessPermit { get; set; }
+			public string? BIRPermit { get; set; }
+		}
 	}
 }

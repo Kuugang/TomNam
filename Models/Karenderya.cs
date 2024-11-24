@@ -14,8 +14,6 @@ namespace TomNam.Models
 		[Required]
 		[ForeignKey("UserId")]
 		public required User User { get; set; }
-
-		
 		
 		public required string Name { get; set; }
 
@@ -48,6 +46,8 @@ namespace TomNam.Models
 		public string? CoverPhoto { get; set; }
 
 		public double? Rating { get; set; }
+		
+		public bool? IsVerified { get; set; }
 		
 		[JsonIgnore] // To avoid circular references
 		public ProofOfBusiness? proofOfBusiness { get; set; }

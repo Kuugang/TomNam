@@ -14,7 +14,6 @@ using TomNam.Middlewares.Filters;
 
 [ApiController]
 [Route("api/auth")]
-[ValidateModelAttribute]
 public class AuthController : ControllerBase
 {
     private readonly UserManager<User> _userManager;
