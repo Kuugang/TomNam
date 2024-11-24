@@ -42,6 +42,7 @@ namespace TomNam
 
             services.AddSingleton<JwtAuthenticationService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IFileUploadService, FileUploadService>();
 
             // Configure Entity Framework with PostgreSQL
             services.AddDbContext<DataContext>(options =>

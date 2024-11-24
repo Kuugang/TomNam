@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TomNam.Data;
@@ -11,9 +12,11 @@ using TomNam.Data;
 namespace TomNam.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20241120122419_Food model added")]
+    partial class Foodmodeladded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -154,26 +157,6 @@ namespace TomNam.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("TomNam.Models.CustomerProfile", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int?>("BehaviorScore")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("CustomerProfile");
-                });
-
             modelBuilder.Entity("TomNam.Models.Food", b =>
                 {
                     b.Property<Guid>("Id")
@@ -222,11 +205,6 @@ namespace TomNam.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<bool?>("IsVerified")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
                     b.Property<string>("LocationBarangay")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -253,7 +231,8 @@ namespace TomNam.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<double?>("Rating")
                         .ValueGeneratedOnAdd()
@@ -271,28 +250,6 @@ namespace TomNam.Migrations
                         .IsUnique();
 
                     b.ToTable("Karenderya");
-                });
-
-            modelBuilder.Entity("TomNam.Models.OwnerProfile", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("KarenderyaId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("KarenderyaId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("OwnerProfile");
                 });
 
             modelBuilder.Entity("TomNam.Models.ProofOfBusiness", b =>
@@ -455,17 +412,6 @@ namespace TomNam.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TomNam.Models.CustomerProfile", b =>
-                {
-                    b.HasOne("TomNam.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TomNam.Models.Food", b =>
                 {
                     b.HasOne("TomNam.Models.Karenderya", "Karenderya")
@@ -484,23 +430,6 @@ namespace TomNam.Migrations
                         .HasForeignKey("TomNam.Models.Karenderya", "UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TomNam.Models.OwnerProfile", b =>
-                {
-                    b.HasOne("TomNam.Models.Karenderya", "Karenderya")
-                        .WithMany()
-                        .HasForeignKey("KarenderyaId");
-
-                    b.HasOne("TomNam.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Karenderya");
 
                     b.Navigation("User");
                 });
