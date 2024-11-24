@@ -7,7 +7,6 @@ namespace TomNam.Services{
             // extension
             List<string> ValidExtensions = new List<string>() {".jpg", ".jpeg", ".png", ".gif", ".pdf"};
             string extension = Path.GetExtension(file.FileName);
-            Console.Write(extension);
             if (!ValidExtensions.Contains(extension)){
                 return $"Invalid file extension({string.Join(", ", ValidExtensions)})";
             }
@@ -21,11 +20,15 @@ namespace TomNam.Services{
             // name change 
             string fileName = Guid.NewGuid().ToString() + extension;
             String RelativePath = Path.Combine("Uploads", UploadPath);
-            String FullPath = Path.Combine(Directory.GetCurrentDirectory(), RelativePath, fileName);
+            String FullPath = Path.Combine(Directory.GetCurrentDirectory(), RelativePath, fileName)
+              .Replace("\\","/");
+
+            Console.WriteLine(FullPath);
             using FileStream stream = new FileStream(FullPath, FileMode.Create);
 
             file.CopyTo(stream);
-            return Path.Combine(RelativePath, fileName);
+            return Path.Combine(RelativePath, fileName)
+              .Replace("\\", "/");
         }
     }
 }
