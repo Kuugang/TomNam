@@ -10,7 +10,6 @@ using TomNam.Data;
 using TomNam.Models;
 using TomNam.Models.DTO;
 using TomNam.Middlewares;
-using TomNam.Middlewares.Filters;
 
 [ApiController]
 [Route("api/auth")]
