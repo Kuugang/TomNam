@@ -10,11 +10,9 @@ using TomNam.Data;
 using TomNam.Models;
 using TomNam.Models.DTO;
 using TomNam.Middlewares;
-using TomNam.Middlewares.Filters;
 
 [ApiController]
 [Route("api/auth")]
-[ValidateModelAttribute]
 public class AuthController : ControllerBase
 {
     private readonly UserManager<User> _userManager;

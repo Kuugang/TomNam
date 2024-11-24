@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 using TomNam.Data;
 using TomNam.Models;
 using TomNam.Middlewares;
-using TomNam.Middlewares.Filters;
 using TomNam.Interfaces;
 using TomNam.Services;
 
@@ -33,11 +32,7 @@ namespace TomNam
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllers(options =>
-            {
-                // options.ModelMetadataDetailsProviders.Add(new SystemTextJsonValidationMetadataProvider());
-                options.Filters.Add<ValidateModelAttribute>();
-            });
+            services.AddControllers();
 
             services.Configure<ApiBehaviorOptions>(options =>
             {
