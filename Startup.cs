@@ -90,6 +90,9 @@ namespace TomNam
 
                 options.AddPolicy("CustomerPolicy", policy =>
                     policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", "Customer"));
+
+                options.AddPolicy("AdminPolicy", policy =>
+                    policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", "Admin"));
             });
 
             // Enable Swagger for API documentation
