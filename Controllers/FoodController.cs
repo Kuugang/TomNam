@@ -16,17 +16,21 @@ public class FoodController : ControllerBase {
     
     private readonly DataContext _context;
     private readonly IUserService _userService;
+	  private readonly IFileUploadService _uploadService;
 
-    public FoodController(DataContext context, IUserService userService)
+    public FoodController(DataContext context, IUserService userService, IFileUploadService uploadService)
     {
         _context = context;
         _userService = userService;
+        _uploadService = uploadService;
     }
 
     [HttpPost("{karenderyaId}")]
     [Authorize(Policy="OwnerPolicy")]
-    public async Task<IActionResult> Create([FromBody] FoodDTO.CreateFood request,[FromRoute] Guid karenderyaId){
+    public async Task<IActionResult> Create([FromForm] FoodDTO.CreateFood request,[FromRoute] Guid karenderyaId){
         var UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        Console.WriteLine("ASDAS");
+        Console.WriteLine(request.FoodPhoto);
         
         if (UserId == null) {
             return StatusCode(StatusCodes.Status404NotFound,
@@ -57,14 +61,14 @@ public class FoodController : ControllerBase {
             });
         }
 
+			  string FoodPhotoPath = _uploadService.Upload(request.FoodPhoto, "Food\\Photo");
         var Food = new Food {
             KarenderyaId = Karen.Id,
             Karenderya = Karen,
             FoodName = request.FoodName,
             FoodDescription = (request.FoodDescription == null) ? "" : request.FoodDescription,
             UnitPrice = request.UnitPrice,
-            FoodPhoto = request.FoodPhoto
-        
+            FoodPhoto = FoodPhotoPath,
         };
 
         await _context.Food.AddAsync(Food);

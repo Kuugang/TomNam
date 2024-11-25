@@ -9,8 +9,8 @@ namespace TomNam.Models.DTO{
             public string? FoodDescription { get; set;}
             [Required]
             public required double UnitPrice { get; set; }
-            [MaxLength(2048)]
-            public string? FoodPhoto { get; set; }
+            [Required]
+            public required IFormFile FoodPhoto { get; set; }
         }
 
         public class ReadUpdateFood {
@@ -19,8 +19,7 @@ namespace TomNam.Models.DTO{
             public string? FoodName { get; set; }
             public string? FoodDescription { get; set;}
             public double UnitPrice { get; set; }
-            [MaxLength(2048)]
-            public string? FoodPhoto { get; set; }
+            public IFormFile? FoodPhoto { get; set; }
         }
     }
 }
