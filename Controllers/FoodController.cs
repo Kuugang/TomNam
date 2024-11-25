@@ -29,20 +29,32 @@ public class FoodController : ControllerBase {
         var UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         
         if (UserId == null) {
-            return NotFound(new { message = "User not found" });
+            return StatusCode(StatusCodes.Status404NotFound,
+            new ErrorResponseDTO {
+                Message = "Food create failed",
+                Error = $"User with ID {UserId} not found"
+            });
         }
 
         var Karen = await _context.Karenderya.FirstOrDefaultAsync(k => k.Id == karenderyaId && k.UserId == UserId);
 
         if (Karen == null) {
-            return NotFound(new { message = "Karenderya not found" });
+            return StatusCode(StatusCodes.Status404NotFound,
+            new ErrorResponseDTO {
+                Message = "Food creation failed",
+                Error = $"Karenderya with ID {karenderyaId} not found"
+            });
         }
         
         // unique food names. 
         var foodCount = await _context.Food.CountAsync(f => f.FoodName == request.FoodName);
         if (foodCount >= 1)
         {
-            return Conflict(new { message = "Food name already exists" });
+            return StatusCode(StatusCodes.Status409Conflict,
+            new ErrorResponseDTO {
+                Message = "Food creation failed",
+                Error = "Food name already exists"
+            });
         }
 
         var Food = new Food {
@@ -67,10 +79,18 @@ public class FoodController : ControllerBase {
         var food = await _context.Food.SingleOrDefaultAsync(f => f.Id == FoodId);
     
         if (food == null) {
-            return NotFound(new { message = "Food not found" });
+            return StatusCode(StatusCodes.Status404NotFound,
+            new ErrorResponseDTO {
+                Message = "Food creation failed",
+                Error = $"Food with ID {FoodId} not found"
+            });
         }
 
-        return Ok(new {message = "Search success", data = food });
+        return StatusCode(StatusCodes.Status200OK,
+        new SuccessResponseDTO {
+            Message = "Search success",
+            Data = food,
+        });
     }
 
     // search food at karenderya
@@ -84,13 +104,20 @@ public class FoodController : ControllerBase {
 
         var foodlist = await query.ToListAsync();
         if (!foodlist.Any()) {
-            return NotFound(new { message = "Food not found" });
+            return StatusCode(StatusCodes.Status404NotFound,
+            new ErrorResponseDTO {
+                Message = "Food creation failed",
+                Error = "Food not found"
+            });
         }
 
-        return Ok(new {message = "Search success", data = foodlist });
+        return StatusCode(StatusCodes.Status200OK,
+        new SuccessResponseDTO {
+            Message = "Search success",
+            Data = foodlist,
+        });
     }
 
-    //TODO: di mo gana. 415
     [HttpPut("{FoodId}/update")]
     [Authorize(Policy="OwnerPolicy")]
     public async Task<IActionResult> Update([FromRoute] Guid FoodId, [FromForm] FoodDTO.ReadUpdateFood request){
@@ -98,18 +125,29 @@ public class FoodController : ControllerBase {
         var food = await _context.Food.FirstOrDefaultAsync(f => f.Id == FoodId);
 
         if (food == null) {
-            return NotFound(new { message = "Food not found" });
+            return StatusCode(StatusCodes.Status404NotFound,
+            new ErrorResponseDTO {
+                Message = "Food update failed",
+                Error = $"Food with ID {FoodId} not found"
+            });
         }
 
         var karenderya = await _context.Karenderya.FirstOrDefaultAsync(k => k.Id == food.KarenderyaId);
 
         if(karenderya == null) {
-            return NotFound(new { message = "Karenderya not found" });
+            return StatusCode(StatusCodes.Status404NotFound,
+            new ErrorResponseDTO {
+                Message = "Food update failed",
+                Error = $"karenderya with ID {food.KarenderyaId} not found"
+            });
         }
 
-        // TODO: mo null sya diri dapita??
         if (userId != karenderya.UserId) {
-            return Unauthorized(new { message = "You are not the owner of this karenderya" });
+            return StatusCode(StatusCodes.Status403Forbidden,
+            new ErrorResponseDTO {
+                Message = "Food delete failed",
+                Error = $"You are not the owner of this karenderya with ID {food.KarenderyaId}"
+            });
         }
 
         // Update food but nanuon nlng kos karenderya update pud
@@ -128,7 +166,11 @@ public class FoodController : ControllerBase {
 
         await _context.SaveChangesAsync();
 
-        return Ok(food);
+        return StatusCode(StatusCodes.Status200OK,
+        new SuccessResponseDTO {
+            Message = "Food update success",
+            Data = food,
+        });
     }
 
     [HttpDelete("{FoodId}/delete")]
@@ -138,22 +180,37 @@ public class FoodController : ControllerBase {
         var food = await _context.Food.FirstOrDefaultAsync(f => f.Id == FoodId);
 
         if (food == null) {
-            return NotFound(new { message = "Food not found" });
+            return StatusCode(StatusCodes.Status404NotFound,
+            new ErrorResponseDTO {
+                Message = "Food delete failed",
+                Error = $"Food with ID {FoodId} not found"
+            });
         }
         
         var karenderya = await _context.Karenderya.FirstOrDefaultAsync(k => k.Id == food.KarenderyaId);
 
         if(karenderya == null) {
-            return NotFound(new { message = "Karenderya not found" });
+            return StatusCode(StatusCodes.Status404NotFound,
+            new ErrorResponseDTO {
+                Message = "Food delete failed",
+                Error = $"karenderya with ID {food.KarenderyaId} not found"
+            });
         }
 
         // TODO: mo null sya diri dapita??
         if (userId != karenderya.UserId) {
-            return Unauthorized(new { message = "You are not the owner of this karenderya" });
+            return StatusCode(StatusCodes.Status403Forbidden,
+            new ErrorResponseDTO {
+                Message = "Food delete failed",
+                Error = $"You are not the owner of this karenderya with ID {food.KarenderyaId}"
+            });
         }
 
         _context.Food.Remove(food);
         await _context.SaveChangesAsync();
-        return Ok(new { message = "Food deleted successfully" });
+        return StatusCode(StatusCodes.Status200OK,
+        new SuccessResponseDTO {
+            Message = "Food deleted successfully"
+        });
     }
 }
