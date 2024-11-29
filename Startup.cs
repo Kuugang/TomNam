@@ -36,12 +36,14 @@ namespace TomNam
 
             services.AddControllers();
 
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
             services.AddControllers(options =>
             {
-                // options.ModelMetadataDetailsProviders.Add(new SystemTextJsonValidationMetadataProvider());
                 options.Filters.Add<ValidateModelAttribute>();
             });
-
 
             services.AddSingleton<JwtAuthenticationService>();
             services.AddScoped<IUserService, UserService>();

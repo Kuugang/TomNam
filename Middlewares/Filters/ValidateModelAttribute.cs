@@ -15,8 +15,8 @@ namespace TomNam.Middlewares.Filters{
 
                 context.Result = new BadRequestObjectResult(new
                 {
-                    Message = "Data Validation Failed",
-                    Error = errors
+                    Message = "Data Validation failed",
+                    Error = errors[0]
                 });
             }
         }
