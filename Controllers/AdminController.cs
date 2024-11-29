@@ -55,6 +55,7 @@ public class AdminController : ControllerBase
 			      		Description = karenderya.Description,
 			      		LogoPhoto = karenderya.LogoPhoto,
 			      		CoverPhoto = karenderya.CoverPhoto,
+                        Rating = karenderya.Rating,
 			      		IsVerified = karenderya.IsVerified
 			      	}
 			      }

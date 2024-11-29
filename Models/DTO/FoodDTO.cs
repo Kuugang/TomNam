@@ -16,11 +16,19 @@ namespace TomNam.Models.DTO{
         public class ReadUpdateFood {
             
             public Guid? Id { get; set; }
+            public String? KarenderyaId { get; set; }
             public string? FoodName { get; set; }
             public string? FoodDescription { get; set;}
             public double UnitPrice { get; set; }
-            public IFormFile? FoodPhoto { get; set; }
+            public String? FoodPhoto { get; set; }
         }
+
+        // final String Id;
+        // final String karenderyaId;
+        // final String foodName;
+        // final String foodDescription;
+        // final double unitPrice;
+        // final String? foodPhoto;
     }
 }
 

@@ -78,6 +78,7 @@ namespace TomNam.Models.DTO
 		public string? Description { get; set; }
 		public string? LogoPhoto { get; set; }
 		public string? CoverPhoto { get; set; }
+		public double? Rating { get; set; }
 		public bool? IsVerified { get; set; }
 		
 		public class ProofOfBusiness 

@@ -37,8 +37,6 @@ public class FoodController : ControllerBase
     )
     {
         var UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        Console.WriteLine("ASDAS");
-        Console.WriteLine(request.FoodPhoto);
 
         if (UserId == null)
         {
@@ -134,18 +132,39 @@ public class FoodController : ControllerBase
             query = query.Where(f => f.FoodName.ToLower().Contains(search.FoodName.ToLower()));
         }
 
+        if (search.KarenderyaId != null)
+        {
+            query = query.Where(f => f.KarenderyaId.ToString() == search.KarenderyaId);
+        }
+
         var foodlist = await query.ToListAsync();
+
         if (!foodlist.Any())
         {
             return StatusCode(
                 StatusCodes.Status404NotFound,
-                new ErrorResponseDTO { Message = "Food creation failed", Error = "Food not found" }
+                new ErrorResponseDTO { Message = "Food get failed", Error = "Food not found" }
             );
+        }
+
+        List<FoodDTO.ReadUpdateFood> responseFoods = new List<FoodDTO.ReadUpdateFood>();
+
+        foreach (var food in foodlist)
+        {
+            responseFoods.Add(new FoodDTO.ReadUpdateFood
+            {
+                Id = food.Id,
+                KarenderyaId = food.KarenderyaId.ToString(),
+                FoodName = food.FoodName,
+                FoodDescription = food.FoodDescription,
+                UnitPrice = food.UnitPrice,
+                FoodPhoto = food.FoodPhoto,
+            });
         }
 
         return StatusCode(
             StatusCodes.Status200OK,
-            new SuccessResponseDTO { Message = "Search success", Data = foodlist }
+            new SuccessResponseDTO { Message = "Search success", Data =  responseFoods}
         );
     }
 

@@ -95,6 +95,7 @@ public class KarenderyasController : ControllerBase
 					Description = karenderya.Description,
 					LogoPhoto = karenderya.LogoPhoto,
 					CoverPhoto = karenderya.CoverPhoto,
+                    Rating = karenderya.Rating,
 					IsVerified = karenderya.IsVerified
 				}
 			}
@@ -105,7 +106,7 @@ public class KarenderyasController : ControllerBase
 	public async Task<IActionResult> Get([FromQuery] KarenderyaRequestDTO.Read filters)
 	{
 		var query = _context.Karenderya.AsQueryable();  // Start with the base query
-		query = query.Where(k => k.IsVerified == true); // Get the karenderyas that are verified
+		// query = query.Where(k => k.IsVerified == true); // Get the karenderyas that are verified
 
 		// Apply KarenderyaId filter if provided
 		if (filters.KarenderyaId != null)
@@ -172,6 +173,7 @@ public class KarenderyasController : ControllerBase
 				Description = karenderya.Description,
 				LogoPhoto = karenderya.LogoPhoto,
 				CoverPhoto = karenderya.CoverPhoto,
+                Rating = karenderya.Rating,
 				IsVerified = karenderya.IsVerified
 			});
 		}
@@ -271,6 +273,7 @@ public class KarenderyasController : ControllerBase
 					Description = karenderya.Description,
 					LogoPhoto = karenderya.LogoPhoto,
 					CoverPhoto = karenderya.CoverPhoto,
+                    Rating = karenderya.Rating,
 					IsVerified = karenderya.IsVerified
 				}
 			}

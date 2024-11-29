@@ -47,7 +47,7 @@ namespace TomNam.Models
 
 		public double? Rating { get; set; }
 		
-		public bool? IsVerified { get; set; }
+		public bool? IsVerified { get; set; } = false;
 		
 		[JsonIgnore] // To avoid circular references
 		public ProofOfBusiness? proofOfBusiness { get; set; }
