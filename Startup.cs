@@ -12,6 +12,7 @@ using Microsoft.Extensions.FileProviders;
 using TomNam.Data;
 using TomNam.Models;
 using TomNam.Middlewares;
+using TomNam.Middlewares.Filters;
 using TomNam.Interfaces;
 using TomNam.Services;
 
@@ -35,9 +36,10 @@ namespace TomNam
 
             services.AddControllers();
 
-            services.Configure<ApiBehaviorOptions>(options =>
+            services.AddControllers(options =>
             {
-                options.SuppressModelStateInvalidFilter = true;
+                // options.ModelMetadataDetailsProviders.Add(new SystemTextJsonValidationMetadataProvider());
+                options.Filters.Add<ValidateModelAttribute>();
             });
 
 
