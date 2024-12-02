@@ -16,6 +16,8 @@ namespace TomNam.Data
         public DbSet<ProofOfBusiness> ProofOfBusiness { get; set; }
         public DbSet<Food> Food { get; set; }
         public DbSet<CartItem> CartItem { get; set; }
+        public DbSet<Reservation> Reservation { get; set; }
+        public DbSet<ReservedItem> ReservedItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -54,6 +56,30 @@ namespace TomNam.Data
                 .HasForeignKey<ProofOfBusiness>(p => p.KarenderyaId); // ProofOfBusiness has one User
 
             modelBuilder.Entity<CartItem>().Property(p => p.IsChecked).HasDefaultValue(true);
+
+             modelBuilder.Entity<Reservation>()
+                .HasOne(r => r.Customer)
+                .WithMany()
+                .HasForeignKey(r => r.CustomerProfileId);
+
+            modelBuilder.Entity<Reservation>()
+                .HasOne(r => r.Karenderya)
+                .WithMany()
+                .HasForeignKey(r => r.KarenderyaId);
+
+             modelBuilder.Entity<ReservedItem>()
+                .HasOne(ri => ri.Reservation)
+                .WithMany(r => r.ReservedItems)
+                .HasForeignKey(ri => ri.ReservationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            modelBuilder.Entity<ReservedItem>()
+                .HasOne(ri => ri.Food)
+                .WithMany()
+                .HasForeignKey(ri => ri.FoodId)
+                .OnDelete(DeleteBehavior.Restrict);
+                
         }
     }
 }
