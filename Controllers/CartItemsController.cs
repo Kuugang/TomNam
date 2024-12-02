@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TomNam.Data;
-using TomNam.Interfaces;
+using TomNam.Interfaces;    
 using TomNam.Middlewares;
 using TomNam.Models;
 using TomNam.Models.DTO;
@@ -119,7 +119,6 @@ public class CartItemsController : ControllerBase
         }
         catch (Exception ex)
         {
-            // Log the exception if you have logging set up
             Console.WriteLine($"Error creating cart item: {ex.Message}");
             return StatusCode(
                 StatusCodes.Status500InternalServerError,
