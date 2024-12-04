@@ -69,14 +69,20 @@ public class TransactionController : ControllerBase
                 });
             }
 
-            var transactionId = Guid.NewGuid().ToString();
+            var transaction = new Transaction{
+                ReservationId = reservation.Id,
+                Reservation = reservation,
+                Total = reservation.Total,
+                DateTime = reservation.ReserveDateTime
+            };
+
+            await _context.Transaction.AddAsync(transaction);
+            await _context.SaveChangesAsync();
             var transactionResponseDto = new TransactionResponseDTO
             {
-                TransactionId = transactionId,
+                TransactionId = transaction.Id,
                 ReservationId = reservation.Id,
-                ReserveItemId = firstReservedItem.Id,
-                ReserveItemQuantity = firstReservedItem.Quantity,
-                Total = (decimal)reservation.Total,
+                Total = reservation.Total,
                 DateTime = reservation.ReserveDateTime
             };
 
@@ -100,11 +106,12 @@ public class TransactionController : ControllerBase
         }
     }
 
-    [HttpGet("{reservationId}")]
+    [HttpGet]
     [Authorize(Policy = "CustomerPolicy")]
-    public async Task<IActionResult> GetTransaction(Guid reservationId)
+    public async Task<IActionResult> GetTransaction()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        
         if (string.IsNullOrEmpty(userId))
         {
             return NotFound(new ErrorResponseDTO
@@ -115,50 +122,30 @@ public class TransactionController : ControllerBase
         }
 
         try
-        {
-            var reservation = await _context.Reservation
-                .Include(r => r.ReservedItems) 
-                .ThenInclude(ri => ri.Food)
-                .FirstOrDefaultAsync(r => r.Id == reservationId);
+        {   
+           var customerProfile = await _context.CustomerProfile
+                .FirstOrDefaultAsync(c => c.UserId == userId);
 
-            if (reservation == null)
-            {
-                return NotFound(new ErrorResponseDTO
-                {
-                    Message = "Transaction retrieval failed",
-                    Error = $"Reservation with ID {reservationId} not found"
+           var userTransactions = await _context.Transaction
+            .Include(t => t.Reservation)
+            .ThenInclude(r => r.Customer)
+            .Where(t => t.Reservation.CustomerProfileId == customerProfile.Id)
+            .ToListAsync();
+            
+            List<TransactionResponseDTO> responseTransactions = new();
+            foreach(var transaction in userTransactions){ 
+                responseTransactions.Add(new TransactionResponseDTO {
+                    TransactionId = transaction.Id,
+                    ReservationId = transaction.Reservation.Id,
+                    Total = transaction.Reservation.Total,
+                    DateTime = transaction.Reservation.ReserveDateTime
                 });
             }
-
-            if (reservation.CustomerProfileId != Guid.Parse(userId))
-            {
-                return Forbid();
-            }
-
-            var firstReservedItem = reservation.ReservedItems.FirstOrDefault();
-            if (firstReservedItem == null)
-            {
-                return BadRequest(new ErrorResponseDTO
-                {
-                    Message = "Transaction retrieval failed",
-                    Error = "No reserved items found in the reservation"
-                });
-            }
-
-            var transactionResponseDto = new TransactionResponseDTO
-            {
-                TransactionId = Guid.NewGuid().ToString(),
-                ReservationId = reservation.Id,
-                ReserveItemId = firstReservedItem.Id,
-                ReserveItemQuantity = firstReservedItem.Quantity,
-                Total = (decimal)reservation.Total,
-                DateTime = reservation.ReserveDateTime
-            };
-
+            
             return Ok(new SuccessResponseDTO
             {
                 Message = "Transaction retrieved successfully",
-                Data = transactionResponseDto
+                Data = userTransactions
             });
         }
         catch (Exception ex)

@@ -97,12 +97,27 @@ public class ReservationController : ControllerBase
                 ModeOfPayment = request.ModeOfPayment
             };
 
+            
+
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 try 
                 {
                     await _context.Reservation.AddAsync(reservation);
                     await _context.SaveChangesAsync();
+
+                    foreach (var item in cartItems){
+                        var ReservedItem = new ReservedItem{
+                            ReservationId = reservation.Id,
+                            Reservation = reservation,
+                            FoodId = item.FoodId,
+                            Food = item.Food,
+                            Quantity = item.Quantity     
+                        };
+
+                        await _context.ReservedItem.AddAsync(ReservedItem);
+                        await _context.SaveChangesAsync();
+                    }
 
                     _context.CartItem.RemoveRange(cartItems);
                     await _context.SaveChangesAsync();
@@ -153,9 +168,9 @@ public class ReservationController : ControllerBase
         }
     }
 
-    [HttpGet]
+    [HttpGet("{Id}")]
     [Authorize(Policy = "CustomerPolicy")]
-    public async Task<IActionResult> GetReservations()
+    public async Task<IActionResult> GetReservations([FromRoute] Guid Id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
@@ -182,9 +197,14 @@ public class ReservationController : ControllerBase
                 });
             }
 
-            var reservations = await _context.Reservation
-            .Where(r => r.CustomerProfileId == customer.Id)
-            .Include(r => r.Karenderya)
+            var ReservedItems = await _context.ReservedItem
+                .Include(ri => ri.Reservation)
+                .Include(ri => ri.Food)
+                .Where(ri => ri.ReservationId == Id)
+                .ToListAsync();
+                    
+            var reservations =  _context.Reservation
+            .Where(r => r.CustomerProfileId == customer.Id && r.Id == Id)
             .Select(r => new ReservationResponseDTO
             {
                 Id = r.Id,
@@ -194,18 +214,9 @@ public class ReservationController : ControllerBase
                 ReserveDateTime = r.ReserveDateTime,
                 Total = r.Total,
                 ModeOfPayment = r.ModeOfPayment,
-                ReservedItems = _context.CartItem
-                    .Where(ci => ci.CustomerProfileId == customer.Id)
-                    .Select(ci => new ReservedItem
-                    {
-                        Id = ci.Id,
-                        FoodId = ci.FoodId,
-                        Food = ci.Food,
-                        Quantity = ci.Quantity
-                    })
-                    .ToList()
-            })
-            .ToListAsync();
+                ReservedItems = ReservedItems
+            });
+            
 
             return Ok(new SuccessResponseDTO
             {

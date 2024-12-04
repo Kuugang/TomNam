@@ -413,7 +413,30 @@ namespace TomNam.Migrations
 
                     b.HasIndex("ReservationId");
 
-                    b.ToTable("ReservedItems");
+                    b.ToTable("ReservedItem");
+                });
+
+            modelBuilder.Entity("TomNam.Models.Transaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ReservationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("Total")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReservationId")
+                        .IsUnique();
+
+                    b.ToTable("Transaction");
                 });
 
             modelBuilder.Entity("TomNam.Models.User", b =>
@@ -653,6 +676,17 @@ namespace TomNam.Migrations
                         .IsRequired();
 
                     b.Navigation("Food");
+
+                    b.Navigation("Reservation");
+                });
+
+            modelBuilder.Entity("TomNam.Models.Transaction", b =>
+                {
+                    b.HasOne("TomNam.Models.Reservation", "Reservation")
+                        .WithOne()
+                        .HasForeignKey("TomNam.Models.Transaction", "ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Reservation");
                 });

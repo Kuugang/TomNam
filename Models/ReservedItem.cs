@@ -5,7 +5,7 @@ namespace TomNam.Models
 {
     public class ReservedItem
     {
-        [Key]
+        
         public Guid Id { get; set; }
 
         [Required]

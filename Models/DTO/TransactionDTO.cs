@@ -14,11 +14,9 @@ namespace TomNam.Models.DTO
 
     public class TransactionResponseDTO
     {
-        public string TransactionId { get; set; }
+        public Guid TransactionId { get; set; }
         public Guid ReservationId { get; set; }
-        public Guid ReserveItemId { get; set; }
-        public int ReserveItemQuantity { get; set; }
-        public decimal Total { get; set; }
+        public double Total { get; set; }
         public DateTime DateTime { get; set; }
 
     }
