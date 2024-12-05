@@ -17,6 +17,8 @@ namespace TomNam.Data
         public DbSet<Food> Food { get; set; }
         public DbSet<CartItem> CartItem { get; set; }
         public DbSet<Reservation> Reservation { get; set; }
+        public DbSet<ReservedItem> ReservedItem { get; set; }
+        public DbSet<Transaction> Transaction { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -65,6 +67,31 @@ namespace TomNam.Data
                 .HasOne(r => r.Karenderya)
                 .WithMany()
                 .HasForeignKey(r => r.KarenderyaId);
+
+             modelBuilder.Entity<ReservedItem>()
+                .HasOne(ri => ri.Reservation)
+                .WithMany(r => r.ReservedItems)
+                .HasForeignKey(ri => ri.ReservationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            modelBuilder.Entity<ReservedItem>()
+                .HasOne(ri => ri.Food)
+                .WithMany()
+                .HasForeignKey(ri => ri.FoodId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // modelBuilder.Entity<Transaction>()
+            //     .HasOne(t => t.Reservation)
+            //     .WithMany() soyjack
+            //     .HasForeignKey(t => t.FoodId)
+            //     .OnDelete(DeleteBehavior.Restrict); soyjack ni
+
+            modelBuilder.Entity<Transaction>()
+                .HasOne(t => t.Reservation)
+                .WithOne() // 1:1 relationship
+                .HasForeignKey<Transaction>(t => t.ReservationId)
+                .OnDelete(DeleteBehavior.Cascade);
                 
         }
     }

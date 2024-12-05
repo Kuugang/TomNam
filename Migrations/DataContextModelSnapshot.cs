@@ -392,6 +392,53 @@ namespace TomNam.Migrations
                     b.ToTable("Reservation");
                 });
 
+            modelBuilder.Entity("TomNam.Models.ReservedItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FoodId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ReservationId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FoodId");
+
+                    b.HasIndex("ReservationId");
+
+                    b.ToTable("ReservedItem");
+                });
+
+            modelBuilder.Entity("TomNam.Models.Transaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ReservationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("Total")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReservationId")
+                        .IsUnique();
+
+                    b.ToTable("Transaction");
+                });
+
             modelBuilder.Entity("TomNam.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -614,9 +661,44 @@ namespace TomNam.Migrations
                     b.Navigation("Karenderya");
                 });
 
+            modelBuilder.Entity("TomNam.Models.ReservedItem", b =>
+                {
+                    b.HasOne("TomNam.Models.Food", "Food")
+                        .WithMany()
+                        .HasForeignKey("FoodId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TomNam.Models.Reservation", "Reservation")
+                        .WithMany("ReservedItems")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Food");
+
+                    b.Navigation("Reservation");
+                });
+
+            modelBuilder.Entity("TomNam.Models.Transaction", b =>
+                {
+                    b.HasOne("TomNam.Models.Reservation", "Reservation")
+                        .WithOne()
+                        .HasForeignKey("TomNam.Models.Transaction", "ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Reservation");
+                });
+
             modelBuilder.Entity("TomNam.Models.Karenderya", b =>
                 {
                     b.Navigation("proofOfBusiness");
+                });
+
+            modelBuilder.Entity("TomNam.Models.Reservation", b =>
+                {
+                    b.Navigation("ReservedItems");
                 });
 #pragma warning restore 612, 618
         }

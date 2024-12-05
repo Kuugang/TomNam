@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace TomNam.Models
 {
@@ -29,6 +31,9 @@ namespace TomNam.Models
 
         [Required]
         public required string ModeOfPayment { get; set; }
+
+        [JsonIgnore]
+        public ICollection<ReservedItem> ReservedItems { get; set; } = new List<ReservedItem>();
 
         
     }
