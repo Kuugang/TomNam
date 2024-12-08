@@ -15,6 +15,7 @@ using TomNam.Middlewares;
 using TomNam.Middlewares.Filters;
 using TomNam.Interfaces;
 using TomNam.Services;
+using TomNam.Repository;
 
 
 namespace TomNam
@@ -47,6 +48,7 @@ namespace TomNam
 
             services.AddSingleton<JwtAuthenticationService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IFileUploadService, FileUploadService>();
 
             // Configure Entity Framework with PostgreSQL

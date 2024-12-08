@@ -132,7 +132,7 @@ public class ReservationController : ControllerBase
                 }
             }
 
-            return Ok(new SuccessResponseDTO
+            return StatusCode(Status201Created, new SuccessResponseDTO
             {
                 Message = "Reservation created successfully",
                 Data = new ReservationResponseDTO
@@ -175,7 +175,7 @@ public class ReservationController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
         {
-            return NotFound(new ErrorResponseDTO
+            return StatusCode(Status404NotFound, new ErrorResponseDTO
             {
                 Message = "Get reservations failed",
                 Error = "User ID not found"
@@ -190,7 +190,7 @@ public class ReservationController : ControllerBase
 
             if (customer == null)
             {
-                return NotFound(new ErrorResponseDTO
+                return StatusCode(Status404NotFound, new ErrorResponseDTO
                 {
                     Message = "Get reservations failed",
                     Error = $"Customer profile for user {userId} not found"

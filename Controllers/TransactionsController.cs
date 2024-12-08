@@ -86,7 +86,7 @@ public class TransactionController : ControllerBase
                 DateTime = reservation.ReserveDateTime
             };
 
-            return Ok(new SuccessResponseDTO
+            return StatusCode(StatusCodes.Status201Created, new SuccessResponseDTO
             {
                 Message = "Transaction created successfully",
                 Data = transactionResponseDto

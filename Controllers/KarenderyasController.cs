@@ -23,22 +23,24 @@ public class KarenderyasController : ControllerBase
 	private readonly DataContext _context;
 	private readonly IUserService _userService;
 	private readonly IFileUploadService _uploadService;
+	private readonly IKarenderyaService _karenderyaService;
 
-	public KarenderyasController(DataContext context, IUserService userService, IFileUploadService uploadService)
+	public KarenderyasController(DataContext context, IUserService userService, IFileUploadService uploadService, IKarenderyaService karenderyaService)
 	{
 		_context = context;
 		_userService = userService;
 		_uploadService = uploadService;
+		_karenderyaService = karenderyaService;
 	}
 
 	[HttpPost("create")]
 	[Authorize(Policy = "OwnerPolicy")]
 	public async Task<IActionResult> Create([FromBody] KarenderyaRequestDTO.Create request)
 	{
-		var user = await JwtAuthenticationService.GetUserFromTokenAsync(User, _userService);
+		var user = await _userService.GetUserFromToken(User);
 		if (user == null)
 		{
-			return StatusCode(StatusCodes.Status401Unauthorized,
+			return StatusCode(StatusCodes.Status403Forbidden,
 				new ErrorResponseDTO
 				{
 					Message = "User is not authenticated.",
@@ -57,28 +59,25 @@ public class KarenderyasController : ControllerBase
 				Error = $"User {user.UserName} already has a karenderya."
 			});
 		}
+		var karenderya = await _karenderyaService.Create(request, user);
+		// var karenderya = new Karenderya
+		// {
+		// 	UserId = user.Id,
+		// 	User = user,
+		// 	Name = request.Name,
+		// 	LocationStreet = request.LocationStreet,
+		// 	LocationBarangay = request.LocationBarangay,
+		// 	LocationCity = request.LocationCity,
+		// 	LocationProvince = request.LocationProvince,
+		// 	Description = request.Description,
+		// 	DateFounded = request.DateFounded
+		// };
 
-		var karenderya = new Karenderya
-		{
-			UserId = user.Id,
-			User = user,
-			Name = request.Name,
-			LocationStreet = request.LocationStreet,
-			LocationBarangay = request.LocationBarangay,
-			LocationCity = request.LocationCity,
-			LocationProvince = request.LocationProvince,
-			Description = request.Description,
-			DateFounded = request.DateFounded
-		};
-
-		await _context.Karenderya.AddAsync(karenderya);
-		await _context.SaveChangesAsync();
-		
-		// Construct the URI for the newly created resource
-		var locationUri = Url.Action(nameof(Get), new { KarenderyaId = karenderya.Id });
+		// await _context.Karenderya.AddAsync(karenderya);
+		// await _context.SaveChangesAsync();
 
 		// Return 201 Created with the resource details
-		return Created(locationUri, 
+		return StatusCode(StatusCodes.Status201Created, 
 			new SuccessResponseDTO
 			{
 				Message = $"Karenderya {karenderya.Name} is created successfully.",
@@ -95,7 +94,7 @@ public class KarenderyasController : ControllerBase
 					Description = karenderya.Description,
 					LogoPhoto = karenderya.LogoPhoto,
 					CoverPhoto = karenderya.CoverPhoto,
-                    Rating = karenderya.Rating,
+										Rating = karenderya.Rating,
 					IsVerified = karenderya.IsVerified
 				}
 			}
@@ -149,10 +148,12 @@ public class KarenderyasController : ControllerBase
 
 		if (!karenderyas.Any())
 		{
-			return StatusCode(StatusCodes.Status200OK,
-				new SuccessResponseDTO 
+			return StatusCode(StatusCodes.Status404NotFound,
+				new ErrorResponseDTO 
 				{
-					Message = "No karenderyas were found."				}
+					Message = "Karenderya search failed.",
+					Error = "No karenderyas were found."
+				}
 			);
 		}
 		
@@ -173,7 +174,7 @@ public class KarenderyasController : ControllerBase
 				Description = karenderya.Description,
 				LogoPhoto = karenderya.LogoPhoto,
 				CoverPhoto = karenderya.CoverPhoto,
-                Rating = karenderya.Rating,
+								Rating = karenderya.Rating,
 				IsVerified = karenderya.IsVerified
 			});
 		}
@@ -209,7 +210,7 @@ public class KarenderyasController : ControllerBase
 		
 		if (karenderya.UserId != UserId)
 		{
-			return StatusCode(StatusCodes.Status401Unauthorized,
+			return StatusCode(StatusCodes.Status403Forbidden,
 				new ErrorResponseDTO 
 				{
 					Message = "Karenderya update failed",
@@ -220,7 +221,7 @@ public class KarenderyasController : ControllerBase
 				
 		// Update karenderya
 		if (request.Name != null)
-	   		karenderya.Name = request.Name;
+		 		karenderya.Name = request.Name;
 
 		if (request.LocationStreet != null)
 			karenderya.LocationStreet = request.LocationStreet;
@@ -273,7 +274,7 @@ public class KarenderyasController : ControllerBase
 					Description = karenderya.Description,
 					LogoPhoto = karenderya.LogoPhoto,
 					CoverPhoto = karenderya.CoverPhoto,
-                    Rating = karenderya.Rating,
+										Rating = karenderya.Rating,
 					IsVerified = karenderya.IsVerified
 				}
 			}
@@ -315,7 +316,7 @@ public class KarenderyasController : ControllerBase
 		
 		if (karenderya.UserId != UserId)
 		{
-			return StatusCode(StatusCodes.Status401Unauthorized,
+			return StatusCode(StatusCodes.Status403Forbidden,
 				new ErrorResponseDTO 
 				{
 					Message = "Karenderya's proof of business creation failed.",
@@ -341,12 +342,9 @@ public class KarenderyasController : ControllerBase
 		
 		await _context.ProofOfBusiness.AddAsync(proof);
 		await _context.SaveChangesAsync();
-		
-		// Construct the URI for the newly created resource
-		var locationUri = Url.Action(nameof(GetProof), new { KarenderyaId = karenderya.Id });
 
 		// Return 201 Created with the resource details
-		return Created(locationUri, 
+		return StatusCode(StatusCodes.Status201Created, 
 			new SuccessResponseDTO
 			{
 				Message = $"Karenderya {karenderya.Name}'s proof of business is created successfully.",
@@ -427,7 +425,7 @@ public class KarenderyasController : ControllerBase
 		
 		if (karenderya.UserId != UserId)
 		{
-			return StatusCode(StatusCodes.Status401Unauthorized,
+			return StatusCode(StatusCodes.Status403Forbidden,
 				new ErrorResponseDTO 
 				{
 					Message = "Karenderya's proof of business update failed.",
