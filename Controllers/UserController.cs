@@ -46,7 +46,7 @@ public class UserController : ControllerBase
 				BehaviorScore = CustomerProfile?.BehaviorScore ?? 0,
 			};
 		}else{
-			var karenderya = await _context.Karenderya.FirstOrDefaultAsync(k => k.UserId == user.Id);
+			var ownerProfile = await _context.OwnerProfile.FirstOrDefaultAsync(k => k.UserId == user.Id);
 			
 			userDTO = new UserDTO.OwnerProfileDTO
 			{
@@ -55,7 +55,7 @@ public class UserController : ControllerBase
 				Role = role[0],
 				FirstName = user.FirstName,
 				LastName = user.LastName,
-				KarenderyaId = karenderya?.Id ?? Guid.Empty
+				KarenderyaId = ownerProfile?.Karenderya?.Id ?? Guid.Empty
 			};
 		}
 

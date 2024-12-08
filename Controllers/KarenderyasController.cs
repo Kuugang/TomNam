@@ -74,6 +74,13 @@ public class KarenderyasController : ControllerBase
 		await _context.Karenderya.AddAsync(karenderya);
 		await _context.SaveChangesAsync();
 		
+		var ownerProfile = await _context.OwnerProfile.FirstOrDefaultAsync(p => p.UserId == user.Id);
+		if (ownerProfile != null)
+		{
+			ownerProfile.Karenderya = karenderya;
+			await _context.SaveChangesAsync();
+		}
+		
 		// Construct the URI for the newly created resource
 		var locationUri = Url.Action(nameof(Get), new { KarenderyaId = karenderya.Id });
 
@@ -95,7 +102,7 @@ public class KarenderyasController : ControllerBase
 					Description = karenderya.Description,
 					LogoPhoto = karenderya.LogoPhoto,
 					CoverPhoto = karenderya.CoverPhoto,
-                    Rating = karenderya.Rating,
+										Rating = karenderya.Rating,
 					IsVerified = karenderya.IsVerified
 				}
 			}
@@ -173,7 +180,7 @@ public class KarenderyasController : ControllerBase
 				Description = karenderya.Description,
 				LogoPhoto = karenderya.LogoPhoto,
 				CoverPhoto = karenderya.CoverPhoto,
-                Rating = karenderya.Rating,
+								Rating = karenderya.Rating,
 				IsVerified = karenderya.IsVerified
 			});
 		}
@@ -220,7 +227,7 @@ public class KarenderyasController : ControllerBase
 				
 		// Update karenderya
 		if (request.Name != null)
-	   		karenderya.Name = request.Name;
+		 		karenderya.Name = request.Name;
 
 		if (request.LocationStreet != null)
 			karenderya.LocationStreet = request.LocationStreet;
@@ -273,7 +280,7 @@ public class KarenderyasController : ControllerBase
 					Description = karenderya.Description,
 					LogoPhoto = karenderya.LogoPhoto,
 					CoverPhoto = karenderya.CoverPhoto,
-                    Rating = karenderya.Rating,
+										Rating = karenderya.Rating,
 					IsVerified = karenderya.IsVerified
 				}
 			}
