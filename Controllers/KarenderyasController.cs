@@ -59,22 +59,33 @@ public class KarenderyasController : ControllerBase
 				Error = $"User {user.UserName} already has a karenderya."
 			});
 		}
-		var karenderya = await _karenderyaService.Create(request, user);
-		// var karenderya = new Karenderya
-		// {
-		// 	UserId = user.Id,
-		// 	User = user,
-		// 	Name = request.Name,
-		// 	LocationStreet = request.LocationStreet,
-		// 	LocationBarangay = request.LocationBarangay,
-		// 	LocationCity = request.LocationCity,
-		// 	LocationProvince = request.LocationProvince,
-		// 	Description = request.Description,
-		// 	DateFounded = request.DateFounded
-		// };
+		// var karenderya = await _karenderyaService.Create(request, user);
+		var karenderya = new Karenderya
+		{
+			UserId = user.Id,
+			User = user,
+			Name = request.Name,
+			LocationStreet = request.LocationStreet,
+			LocationBarangay = request.LocationBarangay,
+			LocationCity = request.LocationCity,
+			LocationProvince = request.LocationProvince,
+			Description = request.Description,
+			DateFounded = request.DateFounded
+		};
 
-		// await _context.Karenderya.AddAsync(karenderya);
-		// await _context.SaveChangesAsync();
+		await _context.Karenderya.AddAsync(karenderya);
+		await _context.SaveChangesAsync();
+		
+		// Getting OwnerProfile to set Karenderya for OwnerProfile
+		var ownerProfile = await _context.OwnerProfile.FirstOrDefaultAsync(op => op.UserId == user.Id);
+    if (ownerProfile != null)
+    {
+      ownerProfile.Karenderya = karenderya;
+      await _context.SaveChangesAsync();
+    }
+    
+    // Construct the URI for the newly created resource
+    var locationUri = Url.Action(nameof(Get), new { KarenderyaId = karenderya.Id });
 
 		// Return 201 Created with the resource details
 		return StatusCode(StatusCodes.Status201Created, 
