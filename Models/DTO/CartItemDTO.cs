@@ -12,7 +12,6 @@ namespace TomNam.Models.DTO
             [Required]
             public required int Quantity { get; set; }
             
-            public bool IsChecked { get; set; }
         }
 
         public class Update

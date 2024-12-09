@@ -276,6 +276,34 @@ namespace TomNam.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Reservation",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CustomerProfileId = table.Column<Guid>(type: "uuid", nullable: false),
+                    KarenderyaId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ReserveDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Total = table.Column<double>(type: "double precision", nullable: false),
+                    ModeOfPayment = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reservation", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Reservation_CustomerProfile_CustomerProfileId",
+                        column: x => x.CustomerProfileId,
+                        principalTable: "CustomerProfile",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Reservation_Karenderya_KarenderyaId",
+                        column: x => x.KarenderyaId,
+                        principalTable: "Karenderya",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CartItem",
                 columns: table => new
                 {
@@ -298,6 +326,52 @@ namespace TomNam.Migrations
                         name: "FK_CartItem_Food_FoodId",
                         column: x => x.FoodId,
                         principalTable: "Food",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ReservedItem",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ReservationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FoodId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReservedItem", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReservedItem_Food_FoodId",
+                        column: x => x.FoodId,
+                        principalTable: "Food",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ReservedItem_Reservation_ReservationId",
+                        column: x => x.ReservationId,
+                        principalTable: "Reservation",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Transaction",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ReservationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Total = table.Column<double>(type: "double precision", nullable: false),
+                    DateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Transaction", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Transaction_Reservation_ReservationId",
+                        column: x => x.ReservationId,
+                        principalTable: "Reservation",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -380,6 +454,32 @@ namespace TomNam.Migrations
                 table: "ProofOfBusiness",
                 column: "KarenderyaId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reservation_CustomerProfileId",
+                table: "Reservation",
+                column: "CustomerProfileId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reservation_KarenderyaId",
+                table: "Reservation",
+                column: "KarenderyaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReservedItem_FoodId",
+                table: "ReservedItem",
+                column: "FoodId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReservedItem_ReservationId",
+                table: "ReservedItem",
+                column: "ReservationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transaction_ReservationId",
+                table: "Transaction",
+                column: "ReservationId",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -410,13 +510,22 @@ namespace TomNam.Migrations
                 name: "ProofOfBusiness");
 
             migrationBuilder.DropTable(
+                name: "ReservedItem");
+
+            migrationBuilder.DropTable(
+                name: "Transaction");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "CustomerProfile");
+                name: "Food");
 
             migrationBuilder.DropTable(
-                name: "Food");
+                name: "Reservation");
+
+            migrationBuilder.DropTable(
+                name: "CustomerProfile");
 
             migrationBuilder.DropTable(
                 name: "Karenderya");

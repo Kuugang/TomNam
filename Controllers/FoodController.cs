@@ -123,7 +123,7 @@ public class FoodController : ControllerBase
 
     // search food at karenderya
     [HttpGet()]
-    public async Task<IActionResult> GetFromSearch([FromQuery] FoodDTO.ReadUpdateFood search)
+    public async Task<IActionResult> GetFromSearch([FromQuery] FoodDTO.ReadFood search)
     {
         var query = _context.Food.AsQueryable();
 
@@ -147,11 +147,11 @@ public class FoodController : ControllerBase
             );
         }
 
-        List<FoodDTO.ReadUpdateFood> responseFoods = new List<FoodDTO.ReadUpdateFood>();
+        List<FoodDTO.ReadFood> responseFoods = new List<FoodDTO.ReadFood>();
 
         foreach (var food in foodlist)
         {
-            responseFoods.Add(new FoodDTO.ReadUpdateFood
+            responseFoods.Add(new FoodDTO.ReadFood
             {
                 Id = food.Id,
                 KarenderyaId = food.KarenderyaId.ToString(),
@@ -172,7 +172,7 @@ public class FoodController : ControllerBase
     [Authorize(Policy = "OwnerPolicy")]
     public async Task<IActionResult> Update(
         [FromRoute] Guid FoodId,
-        [FromForm] FoodDTO.ReadUpdateFood request
+        [FromForm] FoodDTO.UpdateFood request
     )
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -227,15 +227,15 @@ public class FoodController : ControllerBase
         {
             food.FoodDescription = request.FoodDescription;
         }
-        if (request.UnitPrice != food.UnitPrice)
+        if (request.UnitPrice != null)
         {
-            food.UnitPrice = request.UnitPrice;
+            food.UnitPrice = (double)request.UnitPrice;
         }
 
-        // //TODO:
-        // if(request.FoodPhoto != null) {
-        //     food.FoodPhoto = request.FoodPhoto;
-        // }
+        if(request.FoodPhoto != null) {
+            string FoodPhotoPath = _uploadService.Upload(request.FoodPhoto, "Food\\Photo");
+            food.FoodPhoto = FoodPhotoPath;
+        }
 
         await _context.SaveChangesAsync();
 
