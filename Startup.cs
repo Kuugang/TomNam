@@ -23,11 +23,27 @@ namespace TomNam
     {
         public Startup(IConfiguration configuration)
         {
+            var root = Directory.GetCurrentDirectory();
+            var dotenvPath = Path.Combine(root, ".env");
+
+            if (File.Exists(dotenvPath))
+            {
+                DotNetEnv.Env.Load(dotenvPath);
+            }
+
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings.json", optional: true)
                 .AddEnvironmentVariables();
+
             Configuration = builder.Build();
+
+            // Console.WriteLine("Environment Variable: " +
+            //     Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__DEFAULTCONNECTION"));
+            // Console.WriteLine("Environment Variable: " +
+            //     Environment.GetEnvironmentVariable("JWT__SECRET"));
+            // Console.WriteLine("Configuration Connection String: " +
+            //     Configuration.GetConnectionString("DefaultConnection"));
         }
 
         public IConfiguration Configuration { get; }
@@ -51,7 +67,9 @@ namespace TomNam
 
             // Configure Entity Framework with PostgreSQL
             services.AddDbContext<DataContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(
+                    Configuration.GetConnectionString("DefaultConnection")
+                ));
 
             // Configure Identity
             services.AddIdentity<User, IdentityRole>(options =>

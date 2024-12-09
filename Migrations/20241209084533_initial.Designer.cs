@@ -12,8 +12,8 @@ using TomNam.Data;
 namespace TomNam.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241127160216_added cart item model and DTO")]
-    partial class addedcartitemmodelandDTO
+    [Migration("20241209084533_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
