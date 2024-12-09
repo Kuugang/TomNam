@@ -46,7 +46,7 @@ public class UserController : ControllerBase
 					BehaviorScore = CustomerProfile?.BehaviorScore ?? 0,
 			};
 		}else{
-			var OwnerProfile = await _context.OwnerProfile.FirstOrDefaultAsync(p => p.UserId == user.Id);
+			var OwnerProfile = await _context.OwnerProfile.Include(k => k.Karenderya).FirstOrDefaultAsync(p => p.UserId == user.Id);
 			userDTO = new UserDTO.OwnerProfileDTO
 			{
 					Id = user.Id,
