@@ -12,6 +12,7 @@ namespace TomNam.Repository
     {
         private readonly DataContext _context;
         private readonly UserManager<User> _userManager;
+        
         // Constructor injection to get the DbContext
         public UserRepository(DataContext context, UserManager<User> userManager)
         {
