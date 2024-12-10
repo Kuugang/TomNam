@@ -22,16 +22,16 @@ namespace TomNam.Models.DTO
         }
     }
 
-    public class CartItemReponseDTO
+    public class CartItemReponseDTO(CartItem CartItem)
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = CartItem.Id;
 
-        public CustomerProfile Customer { get; set; }
+        public CustomerProfile Customer { get; set; } = CartItem.Customer;
 
-        public Food Food { get; set; }
+        public Food Food { get; set; } = CartItem.Food;
 
-        public int Quantity { get; set; }
+        public int Quantity { get; set; } = CartItem.Quantity;
 
-        public bool IsChecked { get; set; }
+        public bool IsChecked { get; set; } = CartItem.IsChecked;
     }
 }

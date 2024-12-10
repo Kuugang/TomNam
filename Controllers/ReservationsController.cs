@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
 using TomNam.Data;
 using TomNam.Interfaces;
 using TomNam.Models;
@@ -132,7 +133,7 @@ public class ReservationController : ControllerBase
                 }
             }
 
-            return StatusCode(Status201Created, new SuccessResponseDTO
+            return StatusCode(StatusCodes.Status201Created, new SuccessResponseDTO
             {
                 Message = "Reservation created successfully",
                 Data = new ReservationResponseDTO
@@ -175,7 +176,7 @@ public class ReservationController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
         {
-            return StatusCode(Status404NotFound, new ErrorResponseDTO
+            return StatusCode(StatusCodes.Status404NotFound, new ErrorResponseDTO
             {
                 Message = "Get reservations failed",
                 Error = "User ID not found"
@@ -190,7 +191,7 @@ public class ReservationController : ControllerBase
 
             if (customer == null)
             {
-                return StatusCode(Status404NotFound, new ErrorResponseDTO
+                return StatusCode(StatusCodes.Status404NotFound, new ErrorResponseDTO
                 {
                     Message = "Get reservations failed",
                     Error = $"Customer profile for user {userId} not found"

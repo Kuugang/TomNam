@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 
@@ -20,12 +19,12 @@ namespace TomNam.Repository
             _userManager = userManager;
         }
 
-        public async Task<User> GetUserByIdAsync(string userId)
+        public async Task<User?> GetUserByIdAsync(string userId)
         {
             return await _context.Users
                 .FirstOrDefaultAsync(user => user.Id == userId);
         }
-        public async Task<User> GetUserByEmail(string email)
+        public async Task<User?> GetUserByEmail(string email)
         {
             return await _context.Users
                 .FirstOrDefaultAsync(user => user.Email == email);
@@ -61,6 +60,16 @@ namespace TomNam.Repository
 
 		    await _context.SaveChangesAsync();
             return user;
+        }
+
+        public async Task<OwnerProfile?> GetOwnerProfile(string userId){
+            return await _context.OwnerProfile
+                .FirstOrDefaultAsync(ownerProfile => ownerProfile.UserId == userId);
+        }
+
+        public async Task<CustomerProfile?> GetCustomerProfile(string userId){
+            return await _context.CustomerProfile
+                .FirstOrDefaultAsync(customerProfile => customerProfile.UserId == userId);
         }
     }
 }

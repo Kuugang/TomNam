@@ -1,16 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using System.Text.Json;
 
-using TomNam.Data;
-using TomNam.Models;
 using TomNam.Models.DTO;
-using TomNam.Middlewares;
-using TomNam.Services;
 using TomNam.Interfaces;
 
 
@@ -49,7 +39,7 @@ public class AuthController : ControllerBase
                 {
                     Message = "User created successfully",
                     Data = new JWTDTO {
-                        Token = await _userService.GenerateToken(user, role)
+                        Token = _userService.GenerateToken(user, role)
                     }
                 }
             );

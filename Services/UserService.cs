@@ -1,11 +1,8 @@
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
 using TomNam.Models;
 using TomNam.Models.DTO;
-using TomNam.Data;
 using TomNam.Interfaces;
 using TomNam.Middlewares;
 
@@ -25,11 +22,11 @@ namespace TomNam.Services
             _userManager = userManager;
         }
 
-        public async Task<User> GetUserByIdAsync(string userId)
+        public async Task<User?> GetUserByIdAsync(string userId)
         {
             return await _userRepository.GetUserByIdAsync(userId);
         }
-        public async Task<User> GetUserByEmail(string email)
+        public async Task<User?> GetUserByEmail(string email)
         {
             return await _userRepository.GetUserByEmail(email);
         }
@@ -45,17 +42,17 @@ namespace TomNam.Services
             };
             return await _userRepository.Create(user, RegisterRequest.Password, RegisterRequest.UserRole);
         }
-        public async Task<string> Login(LoginRequest LoginRequest)
+        public async Task<string?> Login(LoginRequest LoginRequest)
         {
             var user = await GetUserByEmail(LoginRequest.Email);
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, LoginRequest.Password)){
                 return null;
             }
-            return await GenerateToken(user, (await _userManager.GetRolesAsync(user))[0]);
+            return GenerateToken(user, (await _userManager.GetRolesAsync(user))[0]);
         }
-        public async Task<string> GenerateToken(User user, string role){
-            return _jwtAuthenticationService.GenerateToken(user.Id, user.UserName, role);
+        public string GenerateToken(User user, string role){
+            return _jwtAuthenticationService.GenerateToken(user.Id, user.UserName!, role);
         }
 
         public async Task<string> GetRole(User user)
@@ -63,13 +60,30 @@ namespace TomNam.Services
             string role = (await _userManager.GetRolesAsync(user))[0];
             return role;
         }
-        public async Task<User> GetUserFromToken(ClaimsPrincipal principal){
+        public async Task<User?> GetUserFromToken(ClaimsPrincipal principal){
             if (principal == null) return null;
             var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null) return null;
 
             var userId = userIdClaim.Value;
             return await GetUserByIdAsync(userId);  
+        }
+
+        public async Task <OwnerProfile?> GetOwnerProfile(string userId){
+            return await _userRepository.GetOwnerProfile(userId);
+        }
+
+        public async Task <CustomerProfile?> GetCustomerProfile(string userId){
+            return await _userRepository.GetCustomerProfile(userId);
+        }
+
+        public string? GetUserIdFromToken(ClaimsPrincipal principal){
+            if (principal == null) return null;
+            var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) return null;
+
+            var userId = userIdClaim.Value;
+            return userId;
         }
     }
 }

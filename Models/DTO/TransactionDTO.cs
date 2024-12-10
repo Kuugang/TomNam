@@ -20,6 +20,4 @@ namespace TomNam.Models.DTO
         public DateTime DateTime { get; set; }
 
     }
-
-   
 }

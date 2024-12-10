@@ -5,10 +5,10 @@ namespace TomNam.Services{
     public class FileUploadService : IFileUploadService{
         public string Upload(IFormFile file, string UploadPath){
             // extension
-            List<string> ValidExtensions = new List<string>() {".jpg", ".jpeg", ".png", ".gif", ".pdf"};
+            List<string> ValidExtensions = new List<string>() {".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf"};
             string extension = Path.GetExtension(file.FileName);
             if (!ValidExtensions.Contains(extension)){
-                return $"Invalid file extension({string.Join(", ", ValidExtensions)})";
+                throw new Exception("Invalid file extension");
             }
 
             // file size

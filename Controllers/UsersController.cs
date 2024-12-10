@@ -12,13 +12,13 @@ using TomNam.Interfaces;
 [ApiController]
 [Route("api/users")]
 
-public class UserController : ControllerBase
+public class UsersController : ControllerBase
 {
 	private readonly DataContext _context;
 	private readonly IUserService _userService;
 	private readonly UserManager<User> _userManager;
 
-	public UserController(DataContext context, IUserService userService, UserManager<User> userManager)
+	public UsersController(DataContext context, IUserService userService, UserManager<User> userManager)
 	{
 		_context = context;
 		_userService = userService;

@@ -1,35 +1,20 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
 
 using TomNam.Models;
 using TomNam.Models.DTO;
-using TomNam.Data;
-using TomNam.Middlewares;
 using TomNam.Interfaces;
-using System.Reflection.Metadata.Ecma335;
-using Microsoft.VisualBasic;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System.Runtime;
-
-
 [ApiController]
 [Route("api/karenderyas")]
 
 public class KarenderyasController : ControllerBase
 {
-	private readonly DataContext _context;
 	private readonly IUserService _userService;
-	private readonly IFileUploadService _uploadService;
 	private readonly IKarenderyaService _karenderyaService;
 
-	public KarenderyasController(DataContext context, IUserService userService, IFileUploadService uploadService, IKarenderyaService karenderyaService)
+	public KarenderyasController(IUserService userService, IKarenderyaService karenderyaService)
 	{
-		_context = context;
 		_userService = userService;
-		_uploadService = uploadService;
 		_karenderyaService = karenderyaService;
 	}
 
@@ -49,9 +34,9 @@ public class KarenderyasController : ControllerBase
 			);
 		}
 		
-		var userHasKarenderya = await _context.Karenderya.FirstOrDefaultAsync(k => k.UserId == user.Id);
-		
-		if (userHasKarenderya != null) 
+        var karenderya = await _karenderyaService.GetByOwnerId(user.Id);
+
+		if (karenderya != null) 
 		{
 			return StatusCode(StatusCodes.Status409Conflict,
 			new ErrorResponseDTO {
@@ -59,33 +44,22 @@ public class KarenderyasController : ControllerBase
 				Error = $"User {user.UserName} already has a karenderya."
 			});
 		}
-		var karenderya = await _karenderyaService.Create(request, user);
-		// var karenderya = new Karenderya
-		// {
-		// 	UserId = user.Id,
-		// 	User = user,
-		// 	Name = request.Name,
-		// 	LocationStreet = request.LocationStreet,
-		// 	LocationBarangay = request.LocationBarangay,
-		// 	LocationCity = request.LocationCity,
-		// 	LocationProvince = request.LocationProvince,
-		// 	Description = request.Description,
-		// 	DateFounded = request.DateFounded
-		// };
 
-		// await _context.Karenderya.AddAsync(karenderya);
-		// await _context.SaveChangesAsync();
-		
-		// Getting OwnerProfile to set Karenderya for OwnerProfile
-		var ownerProfile = await _context.OwnerProfile.FirstOrDefaultAsync(op => op.UserId == user.Id);
-    if (ownerProfile != null)
-    {
-      ownerProfile.Karenderya = karenderya;
-      await _context.SaveChangesAsync();
-    }
-    
-    // Construct the URI for the newly created resource
-    var locationUri = Url.Action(nameof(Get), new { KarenderyaId = karenderya.Id });
+		karenderya = await _karenderyaService.Create(request, user);
+
+        var ownerProfile = await _userService.GetOwnerProfile(user.Id);
+        if (ownerProfile == null)
+        {
+            return StatusCode(StatusCodes.Status404NotFound,
+                new ErrorResponseDTO
+                {
+                    Message = "Owner profile not found.",
+                    Error = $"Owner profile for user {user.UserName} not found."
+                }
+            );
+        }
+
+        ownerProfile.Karenderya = karenderya;
 
 		// Return 201 Created with the resource details
 		return StatusCode(StatusCodes.Status201Created, 
@@ -105,7 +79,7 @@ public class KarenderyasController : ControllerBase
 					Description = karenderya.Description,
 					LogoPhoto = karenderya.LogoPhoto,
 					CoverPhoto = karenderya.CoverPhoto,
-										Rating = karenderya.Rating,
+					Rating = karenderya.Rating,
 					IsVerified = karenderya.IsVerified
 				}
 			}
@@ -115,49 +89,9 @@ public class KarenderyasController : ControllerBase
 	[HttpGet("")]
 	public async Task<IActionResult> Get([FromQuery] KarenderyaRequestDTO.Read filters)
 	{
-		var query = _context.Karenderya.AsQueryable();  // Start with the base query
-		// query = query.Where(k => k.IsVerified == true); // Get the karenderyas that are verified
+        List<KarenderyaResponseDTO> karenderyas = await _karenderyaService.FilterKarenderya(filters);
 
-		// Apply KarenderyaId filter if provided
-		if (filters.KarenderyaId != null)
-		{
-			query = query.Where(k => k.Id == filters.KarenderyaId);
-		}
-
-		// Apply Name filter if provided
-		if (!string.IsNullOrEmpty(filters.Name))
-		{
-			query = query.Where(k => k.Name.ToLower().Contains(filters.Name.ToLower()));  // Case-insensitive by default
-		}
-		
-		// Apply LocationStreet filter if provided
-		if (!string.IsNullOrEmpty(filters.LocationStreet))
-		{
-			query = query.Where(k => k.LocationStreet.ToLower().Contains(filters.LocationStreet.ToLower()));
-		}
-
-		// Apply LocationBarangay filter if provided (case-insensitive)
-		if (!string.IsNullOrEmpty(filters.LocationBarangay))
-		{
-			query = query.Where(k => k.LocationBarangay.ToLower().Contains(filters.LocationBarangay.ToLower()));
-		}
-
-		// Apply LocationCity filter if provided (case-insensitive)
-		if (!string.IsNullOrEmpty(filters.LocationCity))
-		{
-			query = query.Where(k => k.LocationCity.ToLower().Contains(filters.LocationCity.ToLower()));
-		}
-
-		// Apply LocationProvince filter if provided (case-insensitive)
-		if (!string.IsNullOrEmpty(filters.LocationProvince))
-		{
-			query = query.Where(k => k.LocationProvince.ToLower().Contains(filters.LocationProvince.ToLower()));
-		}
-
-		// Execute the query and get the results
-		var karenderyas = await query.ToListAsync();
-
-		if (!karenderyas.Any())
+		if (karenderyas.Count == 0)
 		{
 			return StatusCode(StatusCodes.Status404NotFound,
 				new ErrorResponseDTO 
@@ -168,33 +102,11 @@ public class KarenderyasController : ControllerBase
 			);
 		}
 		
-		List<KarenderyaResponseDTO> responseKarenderyas = new List<KarenderyaResponseDTO>();
-		
-		// Return the karenderyas as a successful response
-		foreach(var karenderya in karenderyas)
-		{
-			responseKarenderyas.Add(new KarenderyaResponseDTO {
-				Id = karenderya.Id,
-				UserId = karenderya.UserId,
-				Name = karenderya.Name,
-				LocationStreet = karenderya.LocationStreet,
-				LocationBarangay = karenderya.LocationBarangay,
-				LocationCity = karenderya.LocationCity,
-				LocationProvince = karenderya.LocationProvince,
-				DateFounded = karenderya.DateFounded,
-				Description = karenderya.Description,
-				LogoPhoto = karenderya.LogoPhoto,
-				CoverPhoto = karenderya.CoverPhoto,
-								Rating = karenderya.Rating,
-				IsVerified = karenderya.IsVerified
-			});
-		}
-
 		return StatusCode(StatusCodes.Status200OK,
 			new SuccessResponseDTO 
 			{
 				Message = "Karenderyas found.",
-				Data = responseKarenderyas
+				Data = karenderyas 
 			}
 		);
 	}
@@ -204,7 +116,7 @@ public class KarenderyasController : ControllerBase
 	[Authorize(Policy = "OwnerPolicy")]
 	public async Task<IActionResult> Update([FromRoute] Guid karenderyaId, [FromForm] KarenderyaRequestDTO.Update request)
 	{
-		var karenderya = await _context.Karenderya.FirstOrDefaultAsync(k => k.Id == karenderyaId);
+        var karenderya = await _karenderyaService.GetById(karenderyaId);
 		
 		if (karenderya == null)
 		{
@@ -214,10 +126,10 @@ public class KarenderyasController : ControllerBase
 					Message = "Karenderya update failed.",
 					Error = $"Karenderya with ID = {karenderyaId} does not exist."
 				}
-			);  // Return 404 if not found
+			);
 		}
 		
-		var UserId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get the current user id
+		var UserId = _userService.GetUserIdFromToken(User);
 		
 		if (karenderya.UserId != UserId)
 		{
@@ -229,44 +141,8 @@ public class KarenderyasController : ControllerBase
 				}
 			); 
 		}
-				
-		// Update karenderya
-		if (request.Name != null)
-		 		karenderya.Name = request.Name;
 
-		if (request.LocationStreet != null)
-			karenderya.LocationStreet = request.LocationStreet;
-
-		if (request.LocationBarangay != null)
-			karenderya.LocationBarangay = request.LocationBarangay;
-
-		if (request.LocationCity != null)
-			karenderya.LocationCity = request.LocationCity;
-
-		if (request.LocationProvince != null)
-			karenderya.LocationProvince = request.LocationProvince;
-
-		if (request.Description != null)
-			karenderya.Description = request.Description;
-
-		if (request.LogoPhoto != null){
-			string LogoPath = _uploadService.Upload(request.LogoPhoto, "Karenderya\\Logo");
-			karenderya.LogoPhoto = LogoPath;
-		}
-
-		if (request.CoverPhoto != null){
-			string CoverPhotoPath = _uploadService.Upload(request.CoverPhoto, "Karenderya\\Cover");
-			karenderya.CoverPhoto = CoverPhotoPath;
-		}
-		
-		
-		if (request.IsVerified != null)
-		{
-			karenderya.IsVerified = request.IsVerified;
-		}
-		
-		// Save changes to the database
-		await _context.SaveChangesAsync();
+        karenderya = await _karenderyaService.Update(karenderya, request);
 		
 		return StatusCode(StatusCodes.Status200OK,
 			new SuccessResponseDTO 
@@ -289,7 +165,7 @@ public class KarenderyasController : ControllerBase
 					IsVerified = karenderya.IsVerified
 				}
 			}
-		);  // Return the updated Karenderya
+		);
 	}
 	
 	// QUERY PARAMETERS
@@ -311,7 +187,7 @@ public class KarenderyasController : ControllerBase
 	[Authorize(Policy = "OwnerPolicy")]
 	public async Task<IActionResult> CreateProof([FromRoute] Guid karenderyaId, [FromForm] KarenderyaRequestDTO.ProofOfBusinessCreateDTO request)
 	{	
-		var karenderya = await _context.Karenderya.FindAsync(karenderyaId);
+        var karenderya = await _karenderyaService.GetById(karenderyaId);
 		
 		if (karenderya == null) 
 		{
@@ -323,7 +199,7 @@ public class KarenderyasController : ControllerBase
 			});
 		}
 		
-		var UserId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get the current user id
+        var UserId = _userService.GetUserIdFromToken(User);
 		
 		if (karenderya.UserId != UserId)
 		{
@@ -335,25 +211,8 @@ public class KarenderyasController : ControllerBase
 				}
 			); 
 		}
+        var proof = await _karenderyaService.CreateProofOfBusiness(karenderya, request);
 		
-		string ownerValidID1Path = _uploadService.Upload(request.OwnerValidID1, "Karenderya\\Proof\\ValidID");
-		string ownerValidID2Path = _uploadService.Upload(request.OwnerValidID2, "Karenderya\\Proof\\ValidID");
-		string businessPermitPath = _uploadService.Upload(request.BusinessPermit, "Karenderya\\Proof\\BusinessPermit");
-		string BIRPermitPath = _uploadService.Upload(request.BIRPermit, "Karenderya\\Proof\\BIRPermit");
-		
-		var proof = new ProofOfBusiness
-		{
-			KarenderyaId = karenderya.Id,
-			Karenderya = karenderya,
-			OwnerValidID1 = ownerValidID1Path,
-			OwnerValidID2 = ownerValidID2Path,
-			BusinessPermit = businessPermitPath,
-			BIRPermit = BIRPermitPath
-		};
-		
-		await _context.ProofOfBusiness.AddAsync(proof);
-		await _context.SaveChangesAsync();
-
 		// Return 201 Created with the resource details
 		return StatusCode(StatusCodes.Status201Created, 
 			new SuccessResponseDTO
@@ -375,26 +234,38 @@ public class KarenderyasController : ControllerBase
 	[Authorize(Policy = "OwnerPolicy")]
 	public async Task<IActionResult> GetProof([FromRoute] Guid karenderyaId)
 	{
-		var karenderya = await _context.Karenderya.FirstOrDefaultAsync(k => k.Id == karenderyaId);
+        var karenderya = await _karenderyaService.GetById(karenderyaId);
 		
 		if (karenderya == null)
 		{
 			return StatusCode(StatusCodes.Status404NotFound,
 				new ErrorResponseDTO 
 				{
-					Message = "Proof is not found.",
+					Message = "Karenderya Proof of Business is not found.",
 					Error = $"Karenderya with ID = {karenderyaId} does not exist."
 				}
 			);
 		}
+
+        var UserId = _userService.GetUserIdFromToken(User);
+
+        if (karenderya.UserId != UserId){
+            return StatusCode(StatusCodes.Status403Forbidden,
+                new ErrorResponseDTO
+                {
+                    Message = "Unauthorized",
+                    Error = $"User {User} is not authorized to view karenderya proof of business. User is not the owner of the karenderya."
+                }
+            );
+        }
 		
-		var proof = await _context.ProofOfBusiness.FirstOrDefaultAsync(p => p.KarenderyaId == karenderyaId);
+        var ProofOfBusiness = await _karenderyaService.GetProofOfBusiness(karenderyaId);
 		
-		if (proof == null)
+		if (ProofOfBusiness == null)
 		{
 			return StatusCode(StatusCodes.Status404NotFound,
 				new ErrorResponseDTO {
-					Message = "Proof is not found.",
+					Message = "Karenderya Proof of Business is not found.",
 					Error = $"No proof of business found for karenderya with ID = {karenderyaId}."
 				}
 			);
@@ -403,14 +274,14 @@ public class KarenderyasController : ControllerBase
 		return StatusCode(StatusCodes.Status200OK,
 			new SuccessResponseDTO 
 			{
-				Message = "Proof of business found.",
+				Message = "Karenderya Proof of Business found.",
 				Data = new KarenderyaResponseDTO.ProofOfBusiness
 				{
-					Id = proof.Id,
-					OwnerValidID1 = proof.OwnerValidID1,
-					OwnerValidID2 = proof.OwnerValidID2,
-					BusinessPermit = proof.BusinessPermit,
-					BIRPermit = proof.BIRPermit
+					Id = ProofOfBusiness.Id,
+					OwnerValidID1 = ProofOfBusiness.OwnerValidID1,
+					OwnerValidID2 = ProofOfBusiness.OwnerValidID2,
+					BusinessPermit = ProofOfBusiness.BusinessPermit,
+					BIRPermit = ProofOfBusiness.BIRPermit
 				}
 			}
 		);
@@ -420,7 +291,7 @@ public class KarenderyasController : ControllerBase
 	[Authorize(Policy = "OwnerPolicy")]
 	public async Task<IActionResult> UpdateProof([FromRoute] Guid karenderyaId, [FromForm] KarenderyaRequestDTO.ProofOfBusinessUpdateDTO request)
 	{	
-		var karenderya = await _context.Karenderya.FindAsync(karenderyaId);
+        var karenderya = await _karenderyaService.GetById(karenderyaId);
 		
 		if (karenderya == null) 
 		{
@@ -432,7 +303,7 @@ public class KarenderyasController : ControllerBase
 			});
 		}
 		
-		var UserId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get the current user id
+        var UserId = _userService.GetUserIdFromToken(User);
 		
 		if (karenderya.UserId != UserId)
 		{
@@ -445,7 +316,7 @@ public class KarenderyasController : ControllerBase
 			); 
 		}
 		
-		var proof = await _context.ProofOfBusiness.FirstOrDefaultAsync(p => p.KarenderyaId == karenderyaId);
+        var proof = await _karenderyaService.GetProofOfBusiness(karenderyaId);
 		
 		if (proof == null)
 		{
@@ -456,33 +327,9 @@ public class KarenderyasController : ControllerBase
 				}
 			);
 		}
-		
-		if (request.OwnerValidID1 != null)
-		{
-			string ownerValidID1Path = _uploadService.Upload(request.OwnerValidID1, "Karenderya\\Proof\\ValidID");
-			proof.OwnerValidID1 = ownerValidID1Path;
-		}
-		
-		if (request.OwnerValidID2 != null)
-		{
-			string ownerValidID2Path = _uploadService.Upload(request.OwnerValidID2, "Karenderya\\Proof\\ValidID");
-			proof.OwnerValidID2 = ownerValidID2Path;
-		}
-		
-		if (request.BusinessPermit!= null)
-		{
-			string businessPermitPath = _uploadService.Upload(request.BusinessPermit, "Karenderya\\Proof\\BusinessPermit");
-			proof.BusinessPermit = businessPermitPath;
-		}
-		
-		if (request.BIRPermit!= null)
-		{
-			string BIRPermitPath = _uploadService.Upload(request.BIRPermit, "Karenderya\\Proof\\BIRPermit");
-			proof.BIRPermit = BIRPermitPath;
-		}
-		
-		await _context.SaveChangesAsync();
-		
+
+        proof = await _karenderyaService.UpdateProofOfBusiness(proof, request);
+
 		return StatusCode(StatusCodes.Status200OK,
 			new SuccessResponseDTO 
 			{
@@ -498,5 +345,4 @@ public class KarenderyasController : ControllerBase
 			}
 		);
 	}
-	
 }

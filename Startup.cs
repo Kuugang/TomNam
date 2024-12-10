@@ -1,11 +1,8 @@
-using System;
 using System.Text;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 
@@ -64,8 +61,18 @@ namespace TomNam
 
             services.AddSingleton<JwtAuthenticationService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IKarenderyaService, KarenderyaService>();
+            services.AddScoped<IFoodService, FoodService>();
+            services.AddScoped<ICartItemService, CartItemService>();
+
             services.AddScoped<IFileUploadService, FileUploadService>();
+
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IKarenderyaRepository, KarenderyaRepository>();
+            services.AddScoped<IFoodRepository, FoodRepository>();
+            services.AddScoped<ICartItemRepository, CartItemRepository>();
+
+
 
             // Configure Entity Framework with PostgreSQL
             services.AddDbContext<DataContext>(options =>
