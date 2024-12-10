@@ -12,7 +12,7 @@ using TomNam.Data;
 namespace TomNam.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241204153714_initial")]
+    [Migration("20241209095822_initial")]
     partial class initial
     {
         /// <inheritdoc />
