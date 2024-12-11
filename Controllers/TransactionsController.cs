@@ -1,11 +1,8 @@
-using System;
-using System.Security.Claims; // Add this for ClaimTypes and FindFirstValue
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
 using TomNam.Data;
 using TomNam.Interfaces;
 using TomNam.Models;
@@ -86,7 +83,7 @@ public class TransactionController : ControllerBase
                 DateTime = reservation.ReserveDateTime
             };
 
-            return Ok(new SuccessResponseDTO
+            return StatusCode(StatusCodes.Status201Created, new SuccessResponseDTO
             {
                 Message = "Transaction created successfully",
                 Data = transactionResponseDto

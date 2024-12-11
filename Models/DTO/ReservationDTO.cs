@@ -8,18 +8,14 @@ namespace TomNam.Models.DTO
         public class Create
         {
             [Required]
-            public required List<String> CartItemIds { get; set; }
+            public required List<string> CartItemIds { get; set; }
 
             [Required]
-            public required DateTime  ReserveDateTime { get; set; }
+            public required DateTime ReserveDateTime { get; set; }
 
             [Required]
             public required string ModeOfPayment { get; set; }
-
-
         }
-
-        // mag update if mag cancel
     }
 
     public class ReservationResponseDTO

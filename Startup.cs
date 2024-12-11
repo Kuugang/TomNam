@@ -1,11 +1,8 @@
-using System;
 using System.Text;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 
@@ -15,6 +12,8 @@ using TomNam.Middlewares;
 using TomNam.Middlewares.Filters;
 using TomNam.Interfaces;
 using TomNam.Services;
+using TomNam.Repository;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace TomNam
@@ -59,11 +58,30 @@ namespace TomNam
             services.AddControllers(options =>
             {
                 options.Filters.Add<ValidateModelAttribute>();
+                options.Filters.Add<GlobalExceptionFilter>();
             });
 
             services.AddSingleton<JwtAuthenticationService>();
+            services.AddSingleton<IAuthorizationMiddlewareResultHandler, CustomAuthorizationMiddlewareResultHandler>();
+
+
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IKarenderyaService, KarenderyaService>();
+            services.AddScoped<IFoodService, FoodService>();
+            services.AddScoped<ICartItemService, CartItemService>();
+            services.AddScoped<IReservationService, ReservationService>();
+
             services.AddScoped<IFileUploadService, FileUploadService>();
+
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IKarenderyaRepository, KarenderyaRepository>();
+            services.AddScoped<IFoodRepository, FoodRepository>();
+            services.AddScoped<ICartItemRepository, CartItemRepository>();
+            services.AddScoped<IReservationRepository, ReservationRepository>();
+
 
             // Configure Entity Framework with PostgreSQL
             services.AddDbContext<DataContext>(options =>

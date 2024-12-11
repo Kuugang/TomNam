@@ -30,13 +30,6 @@ namespace TomNam.Models.DTO{
             public double? UnitPrice { get; set; }
             public IFormFile? FoodPhoto { get; set; }
         }
-
-        // final String Id;
-        // final String karenderyaId;
-        // final String foodName;
-        // final String foodDescription;
-        // final double unitPrice;
-        // final String? foodPhoto;
     }
 }
 
