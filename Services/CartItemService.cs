@@ -12,6 +12,9 @@ namespace TomNam.Services{
         public async Task<CartItem?> GetById(Guid Id, string UserId){
             return await _cartItemRepository.GetById(Id, UserId);
         }
+        public async Task<List<CartItem>> GetByIds(List<string> CartItemIds, string UserId){
+            return await _cartItemRepository.GetByIds(CartItemIds, UserId);
+        }
 
         public async Task<CartItem?> GetByFoodId(Guid FoodId, string UserId){
             return await _cartItemRepository.GetByFoodId(FoodId, UserId);
@@ -31,7 +34,7 @@ namespace TomNam.Services{
         }
 
         public async Task<CartItem> Update(CartItem CartItem, CartRequestItemDTO.Update Request){
-            CartItem.Quantity = Request.Quantity;
+            CartItem.Quantity = CartItem.Quantity += Request.Quantity;
             CartItem.IsChecked = Request.IsChecked;
             await _cartItemRepository.Update(CartItem);
             return CartItem;
@@ -43,6 +46,11 @@ namespace TomNam.Services{
 
         public async Task Delete(CartItem CartItem){
             await _cartItemRepository.Delete(CartItem);
+        }
+
+        public async Task DeleteItems(List<CartItem> CartItems)
+        {
+            await _cartItemRepository.DeleteItems(CartItems);
         }
     }
 }

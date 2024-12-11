@@ -1,25 +1,20 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 using TomNam.Data;
 using TomNam.Interfaces;
-using TomNam.Models;
 using TomNam.Models.DTO;
 
 [ApiController]
 [Route("api/cart")]
 public class CartItemsController : ControllerBase
 {
-    private readonly DataContext _context;
     private readonly IUserService _userService;
     private readonly IFoodService _foodService;
     private readonly ICartItemService _cartItemService;
 
-    public CartItemsController(DataContext context, IUserService userService, IFoodService foodService, ICartItemService cartItemService)
+    public CartItemsController(IUserService userService, IFoodService foodService, ICartItemService cartItemService)
     {
-        _context = context;
         _userService = userService;
         _foodService = foodService;
         _cartItemService = cartItemService;
@@ -52,7 +47,7 @@ public class CartItemsController : ControllerBase
         {
             await _cartItemService.Update(CartItem, new CartRequestItemDTO.Update
             {
-                Quantity = CartItem.Quantity += request.Quantity
+                Quantity = request.Quantity
             });
 
             return Ok(new SuccessResponseDTO

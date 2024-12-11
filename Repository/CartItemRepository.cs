@@ -18,6 +18,15 @@ namespace TomNam.Services
             return await _context.CartItem.FirstOrDefaultAsync(x => x.Id == Id && x.Customer.User.Id == UserId);
         }
 
+        public async Task<List<CartItem>> GetByIds(List<string> CartItemIds, string UserId)
+        {
+            return await _context.CartItem
+                .Where(ci => CartItemIds.Contains(ci.Id.ToString()) && ci.Customer.User.Id == UserId)
+                .Include(ci => ci.Food)
+                .ThenInclude(f => f.Karenderya)
+                .ToListAsync();
+        }
+
         public async Task<CartItem?> GetByFoodId(Guid FoodId, string UserId)
         {
             return await _context.CartItem.FirstOrDefaultAsync(x => x.FoodId == FoodId && x.Customer.User.Id == UserId);
@@ -44,8 +53,15 @@ namespace TomNam.Services
                 .ToListAsync();
         }
 
-        public async Task Delete(CartItem CartItem){
+        public async Task Delete(CartItem CartItem)
+        {
             _context.CartItem.Remove(CartItem);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteItems(List<CartItem> cartItems)
+        {
+            _context.CartItem.RemoveRange(cartItems);
             await _context.SaveChangesAsync();
         }
     }
