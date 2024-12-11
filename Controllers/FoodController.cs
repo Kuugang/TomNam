@@ -121,17 +121,17 @@ public class FoodsController : ControllerBase
 	public async Task<IActionResult> GetFromSearch([FromQuery] FoodDTO.ReadFood filters)
 	{
 		List<FoodDTO.ReadFood> responseFoods = await _foodService.FilterFood(filters);
-        if (responseFoods.Count == 0)
-        {
-            return StatusCode(
-                StatusCodes.Status404NotFound,
-                new ErrorResponseDTO
-                {
-                    Message = "Search failed",
-                    Error = "No food found",
-                }
-            );
-        }
+        // if (responseFoods.Count == 0)
+        // {
+        //     return StatusCode(
+        //         StatusCodes.Status404NotFound,
+        //         new ErrorResponseDTO
+        //         {
+        //             Message = "Search failed",
+        //             Error = "No food found",
+        //         }
+        //     );
+        // }
 
 		return StatusCode(
 			StatusCodes.Status200OK,

@@ -59,7 +59,7 @@ public class KarenderyasController : ControllerBase
             );
         }
 
-        ownerProfile.Karenderya = karenderya;
+        await _userService.UpdateOwnerProfile(ownerProfile, karenderya);
 
 		// Return 201 Created with the resource details
 		return StatusCode(StatusCodes.Status201Created, 
@@ -91,16 +91,16 @@ public class KarenderyasController : ControllerBase
 	{
         List<KarenderyaResponseDTO> karenderyas = await _karenderyaService.FilterKarenderya(filters);
 
-		if (karenderyas.Count == 0)
-		{
-			return StatusCode(StatusCodes.Status404NotFound,
-				new ErrorResponseDTO 
-				{
-					Message = "Karenderya search failed.",
-					Error = "No karenderyas were found."
-				}
-			);
-		}
+		// if (karenderyas.Count == 0)
+		// {
+		// 	return StatusCode(StatusCodes.Status404NotFound,
+		// 		new ErrorResponseDTO 
+		// 		{
+		// 			Message = "Karenderya search failed.",
+		// 			Error = "No karenderyas were found."
+		// 		}
+		// 	);
+		// }
 		
 		return StatusCode(StatusCodes.Status200OK,
 			new SuccessResponseDTO 
