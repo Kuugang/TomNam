@@ -133,15 +133,6 @@ namespace TomNam.Services
         public async Task<List<Karenderya>> FilterKarenderyas(KarenderyaRequestDTO.Read filters)
         {
             var Karenderyas = await _karenderyaRepository.FilterKarenderya(filters);
-
-            if (Karenderyas.Count == 0)
-            {
-                throw new ApplicationExceptionBase(
-                    "No karenderyas found.",
-                    "Karenderya filter failed.",
-                    StatusCodes.Status404NotFound
-                );
-            }
             return Karenderyas;
         }
 

@@ -89,14 +89,6 @@ namespace TomNam.Services
         public async Task<List<Food>> FilterFood(FoodDTO.ReadFood filter)
         {
             var Foods = await _foodRepository.FilterFood(filter);
-            if (Foods.Count == 0)
-            {
-                throw new ApplicationExceptionBase(
-                    "No food found",
-                    "Search failed",
-                    StatusCodes.Status404NotFound
-                );
-            }
             return Foods;
         }
 

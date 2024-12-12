@@ -4,17 +4,8 @@ using System.Text.Json.Serialization;
 
 namespace TomNam.Models
 {
-    public class OwnerProfile
+    public class OwnerProfile : UserProfile
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-
-        [Required]
-        public required string UserId { get; set; }
-
-        [Required]
-        [ForeignKey("UserId")]
-        public required User User { get; set; }
-
         public Guid? KarenderyaId { get; set; }
 
         [ForeignKey("KarenderyaId")]
