@@ -11,8 +11,8 @@ public class GlobalExceptionFilter : IExceptionFilter
         {
             context.Result = new ObjectResult(new ErrorResponseDTO
             {
-                Message = "Reservation creation failed",
-                Error = ex.Message
+                Message = ex.Message,
+                Error = ex.Error
             })
             {
                 StatusCode = ex.StatusCode
@@ -22,8 +22,8 @@ public class GlobalExceptionFilter : IExceptionFilter
         {
             context.Result = new ObjectResult(new ErrorResponseDTO
             {
-                Message = "An unexpected error occurred.",
-                Error = context.Exception.Message
+                Message = context.Exception.Message,
+                Error = context.Exception.StackTrace
             })
             {
                 StatusCode = StatusCodes.Status500InternalServerError

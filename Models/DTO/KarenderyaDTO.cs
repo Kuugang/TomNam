@@ -65,29 +65,29 @@ namespace TomNam.Models.DTO
 		}
 	}
 	
-	public class KarenderyaResponseDTO 
+	public class KarenderyaResponseDTO(Karenderya Karenderya) 
 	{
-		public Guid? Id { get; set; } // uuid of karenderya
-		public string? UserId { get; set; } // uuid of karenderya owner
-		public string? Name { get; set; }
-		public string? LocationStreet { get; set; }
-		public string? LocationBarangay { get; set; }
-		public string? LocationCity { get; set; }
-		public string? LocationProvince { get; set; }
-		public DateOnly? DateFounded { get; set; }
-		public string? Description { get; set; }
-		public string? LogoPhoto { get; set; }
-		public string? CoverPhoto { get; set; }
-		public double? Rating { get; set; }
-		public bool? IsVerified { get; set; }
+		public Guid? Id { get; set; } = Karenderya.Id;
+		public string? UserId { get; set; } = Karenderya.UserId;
+		public string? Name { get; set; } = Karenderya.Name;
+		public string? LocationStreet { get; set; } = Karenderya.LocationStreet;
+		public string? LocationBarangay { get; set; } = Karenderya.LocationBarangay;
+		public string? LocationCity { get; set; } = Karenderya.LocationCity;
+		public string? LocationProvince { get; set; } = Karenderya.LocationProvince;
+		public DateOnly? DateFounded { get; set; } = Karenderya.DateFounded;
+		public string? Description { get; set; } = Karenderya.Description;
+		public string? LogoPhoto { get; set; } = Karenderya.LogoPhoto;
+		public string? CoverPhoto { get; set; } = Karenderya.CoverPhoto;
+		public double? Rating { get; set; } = Karenderya.Rating;
+		public bool? IsVerified { get; set; } = Karenderya.IsVerified;
 		
-		public class ProofOfBusiness 
+		public class ProofOfBusiness(Models.ProofOfBusiness proofOfBusiness) 
 		{
-			public Guid? Id { get; set; } // uuid of proof of business
-			public string? OwnerValidID1 { get; set; }
-			public string? OwnerValidID2 { get; set; }
-			public string? BusinessPermit { get; set; }
-			public string? BIRPermit { get; set; }
+            public Guid? Id { get; set; } = proofOfBusiness.Id;
+			public string? OwnerValidID1 { get; set; } = proofOfBusiness.OwnerValidID1;
+			public string? OwnerValidID2 { get; set; } = proofOfBusiness.OwnerValidID2;
+			public string? BusinessPermit { get; set; } = proofOfBusiness.BusinessPermit;
+			public string? BIRPermit { get; set; } = proofOfBusiness.BIRPermit;
 		}
 	}
 }

@@ -38,7 +38,7 @@ namespace TomNam.Interfaces
 
             if (filter.KarenderyaId != null)
             {
-                query = query.Where(f => f.KarenderyaId.ToString() == filter.KarenderyaId);
+                query = query.Where(f => f.KarenderyaId == filter.KarenderyaId);
             }
             return await query.ToListAsync();
         }

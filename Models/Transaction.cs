@@ -11,7 +11,7 @@ namespace TomNam.Models
         public Guid ReservationId { get; set; }
 
         [ForeignKey("ReservationId")]
-        public Reservation Reservation { get; set; }
+        public required Reservation Reservation { get; set; }
 
         [Required]
         public double Total { get; set; }

@@ -4,10 +4,11 @@ namespace TomNam.Interfaces
 {
     public interface IReservationRepository
     {
-        Task<bool> HasConflictingReservationAsync(Guid karenderyaId, DateTime reserveDateTime);
+        Task<Reservation?> GetById(Guid ReservationId);
         Task AddReservationAsync(Reservation reservation);
         Task AddReservedItemAsync(ReservedItem reservedItem);
         Task<List<ReservedItem>> GetAllReservedItemsAsync(Guid customerProfileId);
         Task<List<Reservation>> GetReservationsAsync(Guid customerProfileId);
+        Task UpdateReservation(Reservation reservation);
     }
 }

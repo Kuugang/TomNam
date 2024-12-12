@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TomNam.Data;
@@ -11,9 +12,11 @@ using TomNam.Data;
 namespace TomNam.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20241212111602_Owner Profile Karenderia Attribute Fix")]
+    partial class OwnerProfileKarenderiaAttributeFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -317,8 +320,7 @@ namespace TomNam.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("KarenderyaId")
-                        .IsUnique();
+                    b.HasIndex("KarenderyaId");
 
                     b.HasIndex("UserId");
 
@@ -380,10 +382,6 @@ namespace TomNam.Migrations
 
                     b.Property<DateTime>("ReserveDateTime")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<double>("Total")
                         .HasColumnType("double precision");
@@ -622,9 +620,8 @@ namespace TomNam.Migrations
             modelBuilder.Entity("TomNam.Models.OwnerProfile", b =>
                 {
                     b.HasOne("TomNam.Models.Karenderya", "Karenderya")
-                        .WithOne()
-                        .HasForeignKey("TomNam.Models.OwnerProfile", "KarenderyaId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .WithMany()
+                        .HasForeignKey("KarenderyaId");
 
                     b.HasOne("TomNam.Models.User", "User")
                         .WithMany()

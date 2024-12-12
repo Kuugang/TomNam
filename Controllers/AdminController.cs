@@ -26,39 +26,25 @@ public class AdminController : ControllerBase
     [HttpPut("karenderyas/{karenderyaId}/verify")]
     public async Task<IActionResult> VerifyKarenderya([FromRoute] Guid karenderyaId)
     {
-		    var karenderya = await _context.Karenderya.FindAsync(karenderyaId);
-        
-        if(karenderya == null){
-			      return StatusCode(StatusCodes.Status404NotFound,
-			      new ErrorResponseDTO
-			      {
-			      	Message = "Karenderya verification failed.",
-			      	Error = $"Karenderya with id = {karenderyaId} does not exist."
-			      });
+        var karenderya = await _context.Karenderya.FindAsync(karenderyaId);
+
+        if (karenderya == null)
+        {
+            return StatusCode(StatusCodes.Status404NotFound,
+            new ErrorResponseDTO
+            {
+                Message = "Karenderya verification failed.",
+                Error = $"Karenderya with id = {karenderyaId} does not exist."
+            });
         }
         karenderya.IsVerified = true;
-		    await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
         return Ok(
-			      new SuccessResponseDTO 
-			      {
-			      	Message = $"Karenderya {karenderya.Name} verified successfully",
-			      	Data = new KarenderyaResponseDTO 
-			      	{
-			      		Id = karenderya.Id,
-			      		UserId = karenderya.UserId,
-			      		Name = karenderya.Name,
-			      		LocationStreet = karenderya.LocationStreet,
-			      		LocationBarangay = karenderya.LocationBarangay,
-			      		LocationCity = karenderya.LocationCity,
-			      		LocationProvince = karenderya.LocationProvince,
-			      		DateFounded = karenderya.DateFounded,
-			      		Description = karenderya.Description,
-			      		LogoPhoto = karenderya.LogoPhoto,
-			      		CoverPhoto = karenderya.CoverPhoto,
-                        Rating = karenderya.Rating,
-			      		IsVerified = karenderya.IsVerified
-			      	}
-			      }
+                  new SuccessResponseDTO
+                  {
+                      Message = $"Karenderya {karenderya.Name} verified successfully",
+                      Data = new KarenderyaResponseDTO(karenderya)
+                  }
         );
     }
 }
