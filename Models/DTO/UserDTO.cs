@@ -15,7 +15,6 @@ namespace TomNam.Models.DTO
 		
 		public class OwnerProfileDTO : UserDTO
 		{
-            public Karenderya? Karenderya { get; set; } 
 			public Guid? KarenderyaId { get; set; }
 		}
 	}
