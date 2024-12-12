@@ -8,7 +8,7 @@ namespace TomNam.Models.DTO
         public class Create
         {
             [Required]
-            public required List<string> CartItemIds { get; set; }
+            public required List<Guid> CartItemIds { get; set; }
 
             [Required]
             public required DateTime ReserveDateTime { get; set; }

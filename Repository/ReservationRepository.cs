@@ -15,10 +15,13 @@ namespace TomNam.Repository
             _context = context;
         }
 
-        public async Task<bool> HasConflictingReservationAsync(Guid karenderyaId, DateTime reserveDateTime)
-        {
-            return await _context.Reservation
-                .AnyAsync(r => r.KarenderyaId == karenderyaId && r.ReserveDateTime == reserveDateTime);
+        public async Task<Reservation?> GetById(Guid ReservationId){
+            var reservation = await _context.Reservation
+                .Include(r => r.Karenderya)
+                .Include(r => r.ReservedItems)
+                .ThenInclude(ri => ri.Food)
+                .FirstOrDefaultAsync(r => r.Id == ReservationId);
+            return reservation;
         }
 
         public async Task AddReservationAsync(Reservation reservation)
@@ -47,6 +50,12 @@ namespace TomNam.Repository
             return await _context.Reservation
                 .Where(r => r.CustomerProfileId == customerProfileId)
                 .ToListAsync();
+        }
+
+        public Task UpdateReservation(Reservation reservation)
+        {
+            _context.Reservation.Update(reservation);
+            return _context.SaveChangesAsync();
         }
     }
 }

@@ -18,10 +18,10 @@ namespace TomNam.Services
             return await _context.CartItem.FirstOrDefaultAsync(x => x.Id == Id && x.Customer.User.Id == UserId);
         }
 
-        public async Task<List<CartItem>> GetByIds(List<string> CartItemIds, string UserId)
+        public async Task<List<CartItem>> GetByIds(List<Guid> CartItemIds, string UserId)
         {
             return await _context.CartItem
-                .Where(ci => CartItemIds.Contains(ci.Id.ToString()) && ci.Customer.User.Id == UserId)
+                .Where(ci => CartItemIds.Contains(ci.Id) && ci.Customer.User.Id == UserId)
                 .Include(ci => ci.Food)
                 .ThenInclude(f => f.Karenderya)
                 .ToListAsync();

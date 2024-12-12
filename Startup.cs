@@ -73,6 +73,7 @@ namespace TomNam
             services.AddScoped<IFoodService, FoodService>();
             services.AddScoped<ICartItemService, CartItemService>();
             services.AddScoped<IReservationService, ReservationService>();
+            services.AddScoped<ITransactionService, TransactionService>();
 
             services.AddScoped<IFileUploadService, FileUploadService>();
 
@@ -81,7 +82,7 @@ namespace TomNam
             services.AddScoped<IFoodRepository, FoodRepository>();
             services.AddScoped<ICartItemRepository, CartItemRepository>();
             services.AddScoped<IReservationRepository, ReservationRepository>();
-
+            services.AddScoped<ITransactionRepository, TransactionRepository>();
 
             // Configure Entity Framework with PostgreSQL
             services.AddDbContext<DataContext>(options =>

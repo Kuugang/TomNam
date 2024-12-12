@@ -50,6 +50,12 @@ namespace TomNam.Data
                 .HasPrecision(1, 2)
                 .HasDefaultValue(0.00);
 
+            modelBuilder.Entity<OwnerProfile>()
+                .HasOne(op => op.Karenderya)
+                .WithOne()
+                .HasForeignKey<OwnerProfile>(op => op.KarenderyaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder
                 .Entity<ProofOfBusiness>()
                 .HasOne(p => p.Karenderya)
@@ -58,21 +64,21 @@ namespace TomNam.Data
 
             modelBuilder.Entity<CartItem>().Property(p => p.IsChecked).HasDefaultValue(true);
 
-             modelBuilder.Entity<Reservation>()
-                .HasOne(r => r.Customer)
-                .WithMany()
-                .HasForeignKey(r => r.CustomerProfileId);
+            modelBuilder.Entity<Reservation>()
+               .HasOne(r => r.Customer)
+               .WithMany()
+               .HasForeignKey(r => r.CustomerProfileId);
 
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Karenderya)
                 .WithMany()
                 .HasForeignKey(r => r.KarenderyaId);
 
-             modelBuilder.Entity<ReservedItem>()
-                .HasOne(ri => ri.Reservation)
-                .WithMany(r => r.ReservedItems)
-                .HasForeignKey(ri => ri.ReservationId)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ReservedItem>()
+               .HasOne(ri => ri.Reservation)
+               .WithMany(r => r.ReservedItems)
+               .HasForeignKey(ri => ri.ReservationId)
+               .OnDelete(DeleteBehavior.Cascade);
 
 
             modelBuilder.Entity<ReservedItem>()
@@ -92,7 +98,7 @@ namespace TomNam.Data
                 .WithOne() // 1:1 relationship
                 .HasForeignKey<Transaction>(t => t.ReservationId)
                 .OnDelete(DeleteBehavior.Cascade);
-                
+
         }
     }
 }

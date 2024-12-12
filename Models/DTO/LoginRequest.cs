@@ -8,7 +8,7 @@ namespace TomNam.Models.DTO
         [EmailAddress]
         public required string Email { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Password is required.")]
         public required string Password { get; set; }
     }
 }

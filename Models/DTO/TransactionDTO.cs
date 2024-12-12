@@ -9,7 +9,6 @@ namespace TomNam.Models.DTO
             [Required]
             public Guid ReservationId { get; set; }
         }
-
     }
 
     public class TransactionResponseDTO

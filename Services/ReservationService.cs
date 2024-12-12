@@ -12,23 +12,26 @@ namespace TomNam.Services
         private readonly ICartItemService _cartItemService;
         private readonly IReservationRepository _reservationRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<ReservationService> _logger;
 
         public ReservationService(
             IUserService userService,
             ICartItemService cartItemService,
             IReservationRepository reservationRepository,
-            IUnitOfWork unitOfWork,
-            ILogger<ReservationService> logger)
+            IUnitOfWork unitOfWork)
         {
             _userService = userService;
             _cartItemService = cartItemService;
             _reservationRepository = reservationRepository;
             _unitOfWork = unitOfWork;
-            _logger = logger;
         }
 
-        public async Task<SuccessResponseDTO> CreateReservationAsync(ReservationRequestDTO.Create request, ClaimsPrincipal user)
+        public async Task<Reservation?> GetById(Guid ReservationId)
+        {
+            var reservation = await _reservationRepository.GetById(ReservationId);
+            return reservation;
+        }
+
+        public async Task<Reservation> CreateReservation(ReservationRequestDTO.Create request, ClaimsPrincipal user)
         {
             var userId = _userService.GetUserIdFromToken(user);
             var customerProfile = await _userService.GetCustomerProfile(userId!);
@@ -38,21 +41,15 @@ namespace TomNam.Services
             {
                 throw new ApplicationExceptionBase(
                     "One or more cart items not found or do not belong to the customer.",
+                    "Reservation creation failed.",
                     StatusCodes.Status400BadRequest
                 );
             }
 
             var karenderya = cartItems.First().Food.Karenderya;
 
-            if (await _reservationRepository.HasConflictingReservationAsync(karenderya.Id, request.ReserveDateTime))
-            {
-                throw new ApplicationExceptionBase(
-                    "Selected time slot is already booked.",
-                    StatusCodes.Status409Conflict
-                );
-            }
-
             double total = cartItems.Sum(ci => ci.Food.UnitPrice * ci.Quantity);
+
             var reservation = new Reservation
             {
                 Customer = customerProfile!,
@@ -61,8 +58,11 @@ namespace TomNam.Services
                 KarenderyaId = karenderya.Id,
                 ReserveDateTime = request.ReserveDateTime,
                 Total = total,
-                ModeOfPayment = request.ModeOfPayment
+                ModeOfPayment = request.ModeOfPayment,
+                Status = "Pending"
             };
+
+            List<ReservedItem> reservedItems = new List<ReservedItem>();
 
             await _unitOfWork.ExecuteTransactionAsync(async () =>
             {
@@ -76,63 +76,46 @@ namespace TomNam.Services
                         Quantity = item.Quantity
                     };
                     await _reservationRepository.AddReservedItemAsync(reservedItem);
+                    reservedItems.Add(reservedItem);
                 }
 
                 await _cartItemService.DeleteItems(cartItems);
             });
 
-            return new SuccessResponseDTO
-            {
-                Message = "Reservation created successfully",
-                Data = new ReservationResponseDTO
-                {
-                    Id = reservation.Id,
-                    Customer = customerProfile,
-                    CustomerProfileId = customerProfile.Id,
-                    Karenderya = karenderya,
-                    ReserveDateTime = request.ReserveDateTime,
-                    Total = total,
-                    ModeOfPayment = request.ModeOfPayment,
-                    ReservedItems = cartItems.Select(ci => new ReservedItem
-                    {
-                        Id = ci.Id,
-                        FoodId = ci.FoodId,
-                        Food = ci.Food,
-                        Quantity = ci.Quantity
-                    }).ToList()
-                }
-            };
+            reservation.ReservedItems = reservedItems;
+
+            return reservation;
         }
 
-        public async Task<SuccessResponseDTO> GetAllReservationsAsync(ClaimsPrincipal User)
+        public async Task<List<Reservation>> GetAllReservations(ClaimsPrincipal User)
         {
             var UserId = _userService.GetUserIdFromToken(User);
             var CustomerProfile = await _userService.GetCustomerProfile(UserId!);
             var reservedItems = await _reservationRepository.GetAllReservedItemsAsync(CustomerProfile!.Id);
-            var ReservationsResponse = (await _reservationRepository.GetReservationsAsync(CustomerProfile!.Id))
-            .Select(r => new ReservationResponseDTO
-            {
-                Id = r.Id,
-                CustomerProfileId = r.CustomerProfileId,
-                Customer = r.Customer,
-                Karenderya = r.Karenderya,
-                ReserveDateTime = r.ReserveDateTime,
-                Total = r.Total,
-                ModeOfPayment = r.ModeOfPayment
-            })
-            .ToList();
+            var Reservations = await _reservationRepository.GetReservationsAsync(CustomerProfile!.Id);
 
-            foreach (var reservation in ReservationsResponse)
+            foreach (var reservation in Reservations)
             {
                 reservation.ReservedItems = reservedItems
                     .Where(ri => ri.ReservationId == reservation.Id)
                     .ToList();
             }
+            return Reservations;
+        }
 
-            return new SuccessResponseDTO {
-                Message = "Reservations retrieved successfully",
-                Data = ReservationsResponse
-            };
+        public async Task UpdateReservationStatus(Guid ReservationId, string Status)
+        {
+            var Reservation = await _reservationRepository.GetById(ReservationId);
+            if (Reservation == null)
+            {
+                throw new ApplicationExceptionBase(
+                    "Reservation not found",
+                    "Update reservation status failed.",
+                    StatusCodes.Status404NotFound
+                );
+            }
+            Reservation.Status = Status;
+            await _reservationRepository.UpdateReservation(Reservation);
         }
     }
 }

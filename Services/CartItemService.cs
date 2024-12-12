@@ -1,50 +1,123 @@
+using System.Security.Claims;
+using TomNam.Exceptions;
 using TomNam.Interfaces;
 using TomNam.Models;
 using TomNam.Models.DTO;
 
-namespace TomNam.Services{
-    public class CartItemService: ICartItemService
+namespace TomNam.Services
+{
+    public class CartItemService : ICartItemService
     {
+        private readonly IUserService _userService;
+        private readonly IFoodService _foodService;
         private readonly ICartItemRepository _cartItemRepository;
-        public CartItemService(ICartItemRepository cartItemRepository){
+        public CartItemService(IUserService userService, IFoodService foodService, ICartItemRepository cartItemRepository)
+        {
+            _userService = userService;
+            _foodService = foodService;
             _cartItemRepository = cartItemRepository;
         }
-        public async Task<CartItem?> GetById(Guid Id, string UserId){
+        public async Task<CartItem?> GetById(Guid Id, string UserId)
+        {
             return await _cartItemRepository.GetById(Id, UserId);
         }
-        public async Task<List<CartItem>> GetByIds(List<string> CartItemIds, string UserId){
+        public async Task<List<CartItem>> GetByIds(List<Guid> CartItemIds, string UserId)
+        {
             return await _cartItemRepository.GetByIds(CartItemIds, UserId);
         }
 
-        public async Task<CartItem?> GetByFoodId(Guid FoodId, string UserId){
+        public async Task<CartItem?> GetByFoodId(Guid FoodId, string UserId)
+        {
             return await _cartItemRepository.GetByFoodId(FoodId, UserId);
         }
 
-        public async Task<CartItem> Create(CustomerProfile CustomerProfile, Food Food, CartRequestItemDTO.Create Request){
-            var CartItem = new CartItem
+        public async Task<CartItem> Create(CartRequestItemDTO.Create Request, ClaimsPrincipal User)
+        {
+            var UserId = _userService.GetUserIdFromToken(User);
+
+            var Food = await _foodService.GetById(Request.FoodId);
+            if (Food == null)
             {
-                CustomerProfileId = CustomerProfile!.Id,
-                Customer = CustomerProfile,
-                FoodId = Request.FoodId,
-                Food = Food,
-                Quantity = Request.Quantity,
-            };
-            await _cartItemRepository.Create(CartItem);
-            return CartItem;
+                throw new ApplicationExceptionBase(
+                    $"Food with ID {Request.FoodId} not found",
+                    "Cart item create failed",
+                    StatusCodes.Status404NotFound
+                );
+            }
+
+            var CartItem = await GetByFoodId(Request.FoodId, UserId!);
+
+            var CustomerProfile = await _userService.GetCustomerProfile(UserId!);
+
+            if (CustomerProfile == null)
+            {
+                throw new ApplicationExceptionBase(
+                    $"Customer profile for User ID {UserId} not found",
+                    "Cart item create failed",
+                    StatusCodes.Status404NotFound
+                );
+            }
+            if (CartItem != null)
+            {
+                await Update(CartItem.Id, new CartRequestItemDTO.Update
+                {
+                    Quantity = CartItem.Quantity + Request.Quantity
+                }, User);
+                return CartItem;
+            }
+            else
+            {
+                CartItem = new CartItem
+                {
+                    CustomerProfileId = CustomerProfile.Id,
+                    Customer = CustomerProfile,
+                    FoodId = Request.FoodId,
+                    Food = Food,
+                    Quantity = Request.Quantity,
+                };
+                await _cartItemRepository.Create(CartItem);
+                return CartItem;
+            }
         }
 
-        public async Task<CartItem> Update(CartItem CartItem, CartRequestItemDTO.Update Request){
-            CartItem.Quantity = CartItem.Quantity += Request.Quantity;
+        public async Task<CartItem> Update(Guid CartItemId, CartRequestItemDTO.Update Request, ClaimsPrincipal User)
+        {
+            var UserId = _userService.GetUserIdFromToken(User);
+            var CartItem = await GetById(CartItemId, UserId!);
+
+            if (CartItem == null)
+            {
+                throw new ApplicationExceptionBase(
+                    $"Cart item with ID {CartItemId} not found",
+                    "Cart item update failed",
+                    StatusCodes.Status404NotFound
+                );
+            }
+
+            CartItem.Quantity = Request.Quantity;
             CartItem.IsChecked = Request.IsChecked;
             await _cartItemRepository.Update(CartItem);
             return CartItem;
         }
-        public async Task<List<CartItemReponseDTO>> GetAll(string UserId){
-            var CartItems = await _cartItemRepository.GetAll(UserId);
-            return CartItems.Select(ci => new CartItemReponseDTO(ci)).ToList();
+        public async Task<List<CartItem>> GetAll(ClaimsPrincipal User)
+        {
+            var UserId = _userService.GetUserIdFromToken(User);
+            return await _cartItemRepository.GetAll(UserId!);
         }
+        public async Task Delete(Guid CartItemId, ClaimsPrincipal User)
+        {
+            var UserId = _userService.GetUserIdFromToken(User);
+            var CartItem = await GetById(CartItemId, UserId!);
 
-        public async Task Delete(CartItem CartItem){
+            if (CartItem == null)
+            {
+                throw new ApplicationExceptionBase(
+                    $"Cart item with ID {CartItemId} not found",
+                    "Cart item delete failed",
+                    StatusCodes.Status404NotFound
+                );
+            }
+
             await _cartItemRepository.Delete(CartItem);
         }
 

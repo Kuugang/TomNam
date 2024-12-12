@@ -1,15 +1,16 @@
+using System.Security.Claims;
 using TomNam.Models;
 using TomNam.Models.DTO;
 namespace TomNam.Interfaces{
     public interface ICartItemService
     {
         Task<CartItem?> GetById(Guid Id, string UserId);
-        Task<List<CartItem>> GetByIds(List<string> CartItemIds, string UserId);
+        Task<List<CartItem>> GetByIds(List<Guid> CartItemIds, string UserId);
         Task<CartItem?> GetByFoodId(Guid FoodId, string UserId);
-        Task<CartItem> Create(CustomerProfile CustomerProfile, Food Food, CartRequestItemDTO.Create Request);
-        Task<CartItem> Update(CartItem CartItem, CartRequestItemDTO.Update Request);
-        Task<List<CartItemReponseDTO>> GetAll(string UserId);
-        Task Delete(CartItem CartItem);
+        Task<CartItem> Create(CartRequestItemDTO.Create Request, ClaimsPrincipal User);
+        Task<CartItem> Update(Guid CartItemId, CartRequestItemDTO.Update Request, ClaimsPrincipal User);
+        Task<List<CartItem>> GetAll(ClaimsPrincipal User);
+        Task Delete(Guid CartItemId, ClaimsPrincipal User);
         Task DeleteItems(List<CartItem> CartItems);
     }
 }

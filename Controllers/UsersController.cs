@@ -54,7 +54,7 @@ public class UsersController : ControllerBase
 					Role = role[0],
 					FirstName = user.FirstName,
 					LastName = user.LastName,
-					KarenderyaId = OwnerProfile?.Karenderya?.Id ?? Guid.Empty,
+					KarenderyaId = OwnerProfile?.Karenderya?.Id ?? null,
 			};
 		}
 
