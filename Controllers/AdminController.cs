@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using TomNam.Data;
+using TomNam.Interfaces;
 using TomNam.Models.DTO;
 
 [ApiController]
@@ -11,40 +12,26 @@ public class AdminController : ControllerBase
 {
 
     private readonly DataContext _context;
+    private readonly IKarenderyaService _karenderyaService;
 
-    public AdminController(DataContext context)
+    public AdminController(DataContext context, IKarenderyaService karenderyaService)
     {
         _context = context;
-    }
-    // Your actions here
-    [HttpGet("dashboard")]
-    public IActionResult GetDashboard()
-    {
-        return Ok(new { message = "Admin dashboard data" });
+        _karenderyaService = karenderyaService;
     }
 
     [HttpPut("karenderyas/{karenderyaId}/verify")]
+    [Authorize(Policy = "AdminPolicy")]
     public async Task<IActionResult> VerifyKarenderya([FromRoute] Guid karenderyaId)
     {
-        var karenderya = await _context.Karenderya.FindAsync(karenderyaId);
+        var karenderya = await _karenderyaService.VerifyKarenderya(karenderyaId);
 
-        if (karenderya == null)
-        {
-            return StatusCode(StatusCodes.Status404NotFound,
-            new ErrorResponseDTO
-            {
-                Message = "Karenderya verification failed.",
-                Error = $"Karenderya with id = {karenderyaId} does not exist."
-            });
-        }
-        karenderya.IsVerified = true;
-        await _context.SaveChangesAsync();
         return Ok(
-                  new SuccessResponseDTO
-                  {
-                      Message = $"Karenderya {karenderya.Name} verified successfully",
-                      Data = new KarenderyaResponseDTO(karenderya)
-                  }
+            new SuccessResponseDTO
+            {
+                Message = $"Karenderya {karenderya.Name} verified successfully",
+                Data = karenderya
+            }
         );
     }
 }

@@ -12,5 +12,6 @@ namespace TomNam.Interfaces{
         Task<ProofOfBusiness> CreateProofOfBusiness(Guid KarenderyaId, KarenderyaRequestDTO.ProofOfBusinessCreateDTO request, ClaimsPrincipal User);
         Task<ProofOfBusiness> GetProofOfBusiness(Guid KarenderyaId, ClaimsPrincipal User);
         Task<ProofOfBusiness> UpdateProofOfBusiness(Guid KarenderyaId, KarenderyaRequestDTO.ProofOfBusinessUpdateDTO request, ClaimsPrincipal User); 
+        Task<Karenderya> VerifyKarenderya(Guid KarenderyaId); 
     }
 }

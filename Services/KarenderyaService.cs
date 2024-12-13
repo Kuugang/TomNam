@@ -278,5 +278,23 @@ namespace TomNam.Services
             await _karenderyaRepository.UpdateProofOfBusiness(proofOfBusiness);
             return proofOfBusiness;
         }
+
+        public async Task<Karenderya> VerifyKarenderya(Guid KarenderyaId)
+        {
+            var Karenderya = GetById(KarenderyaId).Result;
+
+            if (Karenderya == null)
+            {
+                throw new ApplicationExceptionBase(
+                    $"Karenderya with ID = {KarenderyaId} does not exist.",
+                    "Karenderya verification failed.",
+                    StatusCodes.Status404NotFound
+                );
+            }
+
+            Karenderya.IsVerified = true;
+            await _karenderyaRepository.Update(Karenderya);
+            return Karenderya;
+        }
     }
 }

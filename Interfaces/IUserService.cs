@@ -13,6 +13,7 @@ namespace TomNam.Interfaces{
 		Task<User?> GetUserFromToken(ClaimsPrincipal principal);
 		Task <OwnerProfile?> GetOwnerProfile(string userId);
 		Task <CustomerProfile?> GetCustomerProfile(string userId);
+		Task <UserDTO> GetUserProfile(ClaimsPrincipal User);
 		string? GetUserIdFromToken(ClaimsPrincipal principal);
 		Task UpdateOwnerProfile(OwnerProfile ownerProfile, Karenderya karenderya);
 	}

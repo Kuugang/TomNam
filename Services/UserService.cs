@@ -81,7 +81,8 @@ namespace TomNam.Services
             }
 
             var token = GenerateToken(user, (await _userManager.GetRolesAsync(user))[0]);
-            return new SuccessResponseDTO{
+            return new SuccessResponseDTO
+            {
                 Message = "Login successful",
                 Data = new JWTDTO { Token = token }
             };
@@ -114,6 +115,40 @@ namespace TomNam.Services
         public async Task<CustomerProfile?> GetCustomerProfile(string userId)
         {
             return await _userRepository.GetCustomerProfile(userId);
+        }
+
+        public async Task<UserDTO> GetUserProfile(ClaimsPrincipal User)
+        {
+            var user = await GetUserFromToken(User);
+            var roles = await _userManager.GetRolesAsync(user!);
+            var role = roles[0];
+
+            if (role == "Customer")
+            {
+                var customerProfile = await GetCustomerProfile(user!.Id);
+                return new UserDTO.CustomerProfileDTO
+                {
+                    Id = user.Id,
+                    Email = user.Email!,
+                    Role = role,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    BehaviorScore = customerProfile?.BehaviorScore ?? 0,
+                };
+            }
+            else
+            {
+                var ownerProfile = await GetOwnerProfile(user!.Id);
+                return new UserDTO.OwnerProfileDTO
+                {
+                    Id = user.Id,
+                    Email = user.Email!,
+                    Role = role,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    KarenderyaId = ownerProfile?.Karenderya?.Id,
+                };
+            }
         }
 
         public string? GetUserIdFromToken(ClaimsPrincipal principal)
