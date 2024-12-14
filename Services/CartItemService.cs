@@ -93,9 +93,12 @@ namespace TomNam.Services
                     StatusCodes.Status404NotFound
                 );
             }
-
-            CartItem.Quantity = Request.Quantity;
-            CartItem.IsChecked = Request.IsChecked;
+            if(Request.Quantity > 0){
+                CartItem.Quantity = (int)Request.Quantity;
+            }
+            if(Request.IsChecked != null){
+                CartItem.IsChecked = (bool)Request.IsChecked;
+            }
             await _cartItemRepository.Update(CartItem);
             return CartItem;
         }

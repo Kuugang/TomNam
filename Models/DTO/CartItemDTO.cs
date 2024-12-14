@@ -16,9 +16,9 @@ namespace TomNam.Models.DTO
 
         public class Update
         {
-            public int Quantity { get; set; }
+            public int? Quantity { get; set; }
 
-            public bool IsChecked { get; set; }
+            public bool? IsChecked { get; set; }
         }
     }
 
