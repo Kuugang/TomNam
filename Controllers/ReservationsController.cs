@@ -25,7 +25,7 @@ public class ReservationController : ControllerBase
             new SuccessResponseDTO
             {
                 Message = "Reservation created successfully",
-                Data = Reservation
+                Data = new ReservationResponseDTO(Reservation)
             }
         );
     }
@@ -39,7 +39,7 @@ public class ReservationController : ControllerBase
             new SuccessResponseDTO
             {
                 Message = "Reservations retrieved successfully",
-                Data = Reservations
+                Data = Reservations.Select(r => new ReservationResponseDTO(r)).ToList()
             } 
         );
     }

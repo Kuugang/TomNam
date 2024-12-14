@@ -18,20 +18,15 @@ namespace TomNam.Models.DTO
         }
     }
 
-    public class ReservationResponseDTO
+    public class ReservationResponseDTO(Reservation Reservation)
     {
-        public Guid Id { get; set; }    
-        public required Guid CustomerProfileId { get; set; }
-        public required CustomerProfile Customer { get; set; }
-        public required Karenderya Karenderya { get; set; }
-        public required DateTime ReserveDateTime { get; set; }
-        public required double Total { get; set; }
-        public required string ModeOfPayment { get; set; }
+        public Guid Id { get; set; } = Reservation.Id;
+        public Karenderya Karenderya { get; set; } = Reservation.Karenderya;
+        public DateTime ReserveDateTime { get; set; } = Reservation.ReserveDateTime;
+        public double Total { get; set; } = Reservation.Total;
+        public string ModeOfPayment { get; set; } = Reservation.ModeOfPayment;
+        public string Status { get; set; } = Reservation.Status;
         [JsonPropertyName("reservedItems")]
-        public List<ReservedItem> ReservedItems { get; set; } = new();
-
-
+        public List<ReservedItem> ReservedItems { get; set; } = (List<ReservedItem>)Reservation.ReservedItems;
     }
-
-    
 }

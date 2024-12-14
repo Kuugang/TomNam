@@ -26,8 +26,6 @@ namespace TomNam.Models.DTO
     {
         public Guid Id { get; set; } = CartItem.Id;
 
-        public CustomerProfile Customer { get; set; } = CartItem.Customer;
-
         public Food Food { get; set; } = CartItem.Food;
 
         public int Quantity { get; set; } = CartItem.Quantity;

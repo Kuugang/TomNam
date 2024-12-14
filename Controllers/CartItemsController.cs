@@ -24,7 +24,7 @@ public class CartItemsController : ControllerBase
         return Ok(new SuccessResponseDTO
         {
             Message = "Cart item successfully added",
-            Data = CartItem
+            Data = new CartItemReponseDTO(CartItem)
         });
     }
 
@@ -38,7 +38,7 @@ public class CartItemsController : ControllerBase
         return Ok(new SuccessResponseDTO
         {
             Message = "Cart items retrieved successfully",
-            Data = CartItems
+            Data = CartItems.Select(ci => new CartItemReponseDTO(ci)).ToList()
         });
     }
 
@@ -52,7 +52,7 @@ public class CartItemsController : ControllerBase
         return Ok(new SuccessResponseDTO
         {
             Message = "Cart item updated successfully",
-            Data = CartItem
+            Data = new CartItemReponseDTO(CartItem)
         });
 
     }

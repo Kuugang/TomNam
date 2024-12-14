@@ -17,6 +17,7 @@ namespace TomNam.Services
         {
             return await _context.CartItem
                 .Include(x => x.Food)
+                .Include(x => x.Food.Karenderya)
                 .FirstOrDefaultAsync(x => x.Id == Id && x.Customer.User.Id == UserId);
         }
 
@@ -25,7 +26,7 @@ namespace TomNam.Services
             return await _context.CartItem
                 .Where(ci => CartItemIds.Contains(ci.Id) && ci.Customer.User.Id == UserId)
                 .Include(ci => ci.Food)
-                .ThenInclude(f => f.Karenderya)
+                .Include(ci => ci.Food.Karenderya)
                 .ToListAsync();
         }
 
@@ -51,6 +52,7 @@ namespace TomNam.Services
             return await _context.CartItem
                 .Include(x => x.Customer)
                 .Include(x => x.Food)
+                    .Include(x => x.Food.Karenderya)
                 .Where(x => x.Customer.User.Id == UserId)
                 .ToListAsync();
         }
