@@ -15,7 +15,9 @@ namespace TomNam.Services
         }
         public async Task<CartItem?> GetById(Guid Id, string UserId)
         {
-            return await _context.CartItem.FirstOrDefaultAsync(x => x.Id == Id && x.Customer.User.Id == UserId);
+            return await _context.CartItem
+                .Include(x => x.Food)
+                .FirstOrDefaultAsync(x => x.Id == Id && x.Customer.User.Id == UserId);
         }
 
         public async Task<List<CartItem>> GetByIds(List<Guid> CartItemIds, string UserId)
