@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TomNam.Models;
 using TomNam.Interfaces;
 using TomNam.Data;
+using Microsoft.EntityFrameworkCore.Update.Internal;
 
 namespace TomNam.Repository
 {
@@ -41,6 +42,7 @@ namespace TomNam.Repository
             return await _context.ReservedItem
                 .Include(ri => ri.Reservation)
                 .Include(ri => ri.Food)
+                .Include(ri => ri.Food.Karenderya)
                 .Where(ri => ri.Reservation.CustomerProfileId == customerProfileId)
                 .ToListAsync();
         }
@@ -48,6 +50,7 @@ namespace TomNam.Repository
         public async Task<List<Reservation>> GetReservationsAsync(Guid customerProfileId)
         {
             return await _context.Reservation
+                .Include(r => r.Karenderya)
                 .Where(r => r.CustomerProfileId == customerProfileId)
                 .ToListAsync();
         }
