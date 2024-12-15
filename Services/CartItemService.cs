@@ -35,7 +35,7 @@ namespace TomNam.Services
         {
             var UserId = _userService.GetUserIdFromToken(User);
 
-            var Food = await _foodService.GetById(Request.FoodId);
+            var Food = await _foodService.GetByIdWithKarenderya(Request.FoodId);
             if (Food == null)
             {
                 throw new ApplicationExceptionBase(

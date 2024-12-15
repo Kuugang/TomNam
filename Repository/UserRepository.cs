@@ -62,7 +62,7 @@ namespace TomNam.Repository
 		}
 
 		public async Task<OwnerProfile?> GetOwnerProfile(string userId){
-			return await _context.OwnerProfile
+			return await _context.OwnerProfile.Include(k => k.Karenderya)
 				.FirstOrDefaultAsync(ownerProfile => ownerProfile.UserId == userId);
 		}
 
