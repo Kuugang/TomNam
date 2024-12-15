@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using TomNam.Models.DTO;
 
 namespace TomNam.Models.DTO
 {
@@ -18,15 +19,30 @@ namespace TomNam.Models.DTO
         }
     }
 
-    public class ReservationResponseDTO(Reservation Reservation)
+    public class ReservationResponseDTO
     {
-        public Guid Id { get; set; } = Reservation.Id;
-        public Karenderya Karenderya { get; set; } = Reservation.Karenderya;
-        public DateTime ReserveDateTime { get; set; } = Reservation.ReserveDateTime;
-        public double Total { get; set; } = Reservation.Total;
-        public string ModeOfPayment { get; set; } = Reservation.ModeOfPayment;
-        public string Status { get; set; } = Reservation.Status;
+        public Guid Id { get; set; }
+        public KarenderyaResponseDTO Karenderya { get; set; }
+        public DateTime ReserveDateTime { get; set; }
+        public double Total { get; set; }
+        public string ModeOfPayment { get; set; }
+        public string Status { get; set; }
+
         [JsonPropertyName("reservedItems")]
-        public List<ReservedItem> ReservedItems { get; set; } = (List<ReservedItem>)Reservation.ReservedItems;
+        public List<ReservedItemDTO> ReservedItems { get; set; }
+
+        public ReservationResponseDTO(Reservation reservation)
+        {
+            Id = reservation.Id;
+            Karenderya = new KarenderyaResponseDTO(reservation.Karenderya);
+            ReserveDateTime = reservation.ReserveDateTime;
+            Total = reservation.Total;
+            ModeOfPayment = reservation.ModeOfPayment;
+            Status = reservation.Status;
+            ReservedItems = reservation.ReservedItems
+                .Select(ri => new ReservedItemDTO(ri)) // Map each ReservedItem to ReservedItemDTO
+                .ToList();
+        }
     }
+
 }

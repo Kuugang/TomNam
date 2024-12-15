@@ -16,7 +16,8 @@ namespace TomNam.Repository
             _context = context;
         }
 
-        public async Task<Reservation?> GetById(Guid ReservationId){
+        public async Task<Reservation?> GetById(Guid ReservationId)
+        {
             var reservation = await _context.Reservation
                 .Include(r => r.Karenderya)
                 .Include(r => r.ReservedItems)
@@ -59,6 +60,23 @@ namespace TomNam.Repository
         {
             _context.Reservation.Update(reservation);
             return _context.SaveChangesAsync();
+        }
+
+        public async Task<List<Reservation>> GetKarenderyaReservations(Guid karenderyaId)
+        {
+            return await _context.Reservation
+                .Include(r => r.Karenderya)
+                .Where(r => r.KarenderyaId == karenderyaId)
+                .ToListAsync();
+        }
+
+        public async Task<List<ReservedItem>> GetAllKarenderyaReservedItems(Guid KarenderyaId)
+        {
+            return await _context.ReservedItem
+                .Include(ri => ri.Food)
+                .Include(ri => ri.Food.Karenderya)
+                .Where(ri => ri.Reservation.KarenderyaId == KarenderyaId)
+                .ToListAsync();
         }
     }
 }

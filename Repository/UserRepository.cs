@@ -71,10 +71,23 @@ namespace TomNam.Repository
 				.FirstOrDefaultAsync(customerProfile => customerProfile.UserId == userId);
 		}
 
+        public async Task<CustomerProfile?> GetCustomerProfileById(string CustomerProfileId)
+        {
+			return await _context.CustomerProfile
+				.FirstOrDefaultAsync(customerProfile => customerProfile.Id.ToString() == CustomerProfileId);
+        }
+
 		public async Task UpdateOwnerProfile(OwnerProfile ownerProfile)
 		{
 			_context.OwnerProfile.Update(ownerProfile);
 			await _context.SaveChangesAsync();
 		}
-	}
+
+        public async Task UpdateCustomerProfile(CustomerProfile CustomerProfile)
+        {
+            _context.CustomerProfile.Update(CustomerProfile);
+            await _context.SaveChangesAsync();
+        }
+
+    }
 }

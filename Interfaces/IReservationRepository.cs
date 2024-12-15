@@ -8,7 +8,9 @@ namespace TomNam.Interfaces
         Task AddReservationAsync(Reservation reservation);
         Task AddReservedItemAsync(ReservedItem reservedItem);
         Task<List<ReservedItem>> GetAllReservedItemsAsync(Guid customerProfileId);
+        Task<List<ReservedItem>> GetAllKarenderyaReservedItems(Guid KarenderyaId);
         Task<List<Reservation>> GetReservationsAsync(Guid customerProfileId);
+        Task<List<Reservation>> GetKarenderyaReservations(Guid karenderyaId);
         Task UpdateReservation(Reservation reservation);
     }
 }

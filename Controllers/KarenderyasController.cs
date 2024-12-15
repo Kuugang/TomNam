@@ -24,7 +24,7 @@ public class KarenderyasController : ControllerBase
             new SuccessResponseDTO
             {
                 Message = $"Karenderya {Karenderya.Name} is created successfully.",
-                Data = Karenderya
+                Data = new KarenderyaResponseDTO(Karenderya)
             }
         );
     }
@@ -38,7 +38,7 @@ public class KarenderyasController : ControllerBase
             new SuccessResponseDTO
             {
                 Message = "Karenderyas found.",
-                Data = Karenderyas
+                Data = Karenderyas.Select(k => new KarenderyaResponseDTO(k))
             }
         );
     }
@@ -55,7 +55,7 @@ public class KarenderyasController : ControllerBase
             new SuccessResponseDTO
             {
                 Message = $"Karenderya {Karenderya.Name} updated successfully",
-                Data = Karenderya,
+                Data = new KarenderyaResponseDTO(Karenderya)
             }
         );
     }

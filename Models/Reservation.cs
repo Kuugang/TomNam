@@ -25,7 +25,7 @@ namespace TomNam.Models
 
         [Required]
         [ForeignKey("KarenderyaId")]
-        public required Karenderya  Karenderya { get; set; }
+        public Karenderya? Karenderya { get; set; }
 
         [Required]
         public required DateTime  ReserveDateTime { get; set; }

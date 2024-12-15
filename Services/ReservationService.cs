@@ -11,17 +11,20 @@ namespace TomNam.Services
         private readonly IUserService _userService;
         private readonly ICartItemService _cartItemService;
         private readonly IReservationRepository _reservationRepository;
+        private readonly IKarenderyaService _karenderyaService;
         private readonly IUnitOfWork _unitOfWork;
 
         public ReservationService(
             IUserService userService,
             ICartItemService cartItemService,
             IReservationRepository reservationRepository,
+            IKarenderyaService karenderyaService,
             IUnitOfWork unitOfWork)
         {
             _userService = userService;
             _cartItemService = cartItemService;
             _reservationRepository = reservationRepository;
+            _karenderyaService = karenderyaService;
             _unitOfWork = unitOfWork;
         }
 
@@ -90,17 +93,36 @@ namespace TomNam.Services
         public async Task<List<Reservation>> GetAllReservations(ClaimsPrincipal User)
         {
             var UserId = _userService.GetUserIdFromToken(User);
-            var CustomerProfile = await _userService.GetCustomerProfile(UserId!);
-            var reservedItems = await _reservationRepository.GetAllReservedItemsAsync(CustomerProfile!.Id);
-            var Reservations = await _reservationRepository.GetReservationsAsync(CustomerProfile!.Id);
+            var user = await _userService.GetUserFromToken(User);
 
-            foreach (var reservation in Reservations)
+            var role = await _userService.GetRole(user!); 
+
+            if(role == "Owner")
             {
-                reservation.ReservedItems = reservedItems
-                    .Where(ri => ri.ReservationId == reservation.Id)
-                    .ToList();
+                var OwnerProfile = await _userService.GetOwnerProfile(UserId!);
+                var KarenderyaReservations = await _reservationRepository.GetKarenderyaReservations(OwnerProfile!.Karenderya!.Id);
+                var reservedItems = await _reservationRepository.GetAllKarenderyaReservedItems(OwnerProfile!.Karenderya!.Id);
+
+                foreach (var reservation in KarenderyaReservations)
+                {
+                    reservation.ReservedItems = reservedItems
+                        .Where(ri => ri.ReservationId == reservation.Id)
+                        .ToList();
+                }
+                return KarenderyaReservations;
+            }else{
+                var CustomerProfile = await _userService.GetCustomerProfile(UserId!);
+                var reservedItems = await _reservationRepository.GetAllReservedItemsAsync(CustomerProfile!.Id);
+                var Reservations = await _reservationRepository.GetReservationsAsync(CustomerProfile!.Id);
+
+                foreach (var reservation in Reservations)
+                {
+                    reservation.ReservedItems = reservedItems
+                        .Where(ri => ri.ReservationId == reservation.Id)
+                        .ToList();
+                }
+                return Reservations;
             }
-            return Reservations;
         }
 
         public async Task UpdateReservationStatus(Guid ReservationId, string Status)

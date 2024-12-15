@@ -2,8 +2,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TomNam.Models.DTO
 {
-    public class FoodDTO
+    public class FoodDTO(Food food)
     {
+        public Guid? Id { get; set; } = food.Id;
+        public Guid? KarenderyaId { get; set; } = food.KarenderyaId;
+        public string? FoodName { get; set; } = food.FoodName;
+        public string? FoodDescription { get; set; } = food.FoodDescription;
+        public double? UnitPrice { get; set; } = food.UnitPrice;
+        public string? FoodPhoto { get; set; } = food.FoodPhoto;
         public class CreateFood
         {
             [Required]

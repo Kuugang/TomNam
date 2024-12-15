@@ -117,6 +117,11 @@ namespace TomNam.Services
             return await _userRepository.GetCustomerProfile(userId);
         }
 
+        public async Task<CustomerProfile?> GetCustomerProfileById(string CustomerProfileId)
+        {
+            return await _userRepository.GetCustomerProfileById(CustomerProfileId);
+        }
+
         public async Task<UserDTO> GetUserProfile(ClaimsPrincipal User)
         {
             var user = await GetUserFromToken(User);
@@ -166,5 +171,11 @@ namespace TomNam.Services
             ownerProfile.Karenderya = karenderya;
             return _userRepository.UpdateOwnerProfile(ownerProfile);
         }
+
+        public async Task UpdateCustomerProfile(CustomerProfile CustomerProfile)
+        {
+            await _userRepository.UpdateCustomerProfile(CustomerProfile);
+        }
+
     }
 }

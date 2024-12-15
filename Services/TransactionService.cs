@@ -55,7 +55,7 @@ namespace TomNam.Services
             }
 
             var OwnerProfile = await _userService.GetOwnerProfile(UserId!);
-            if (reservation.Karenderya.Id != OwnerProfile!.KarenderyaId)
+            if (reservation.Karenderya!.Id != OwnerProfile!.KarenderyaId)
             {
                 throw new ApplicationExceptionBase(
                     "You are not authorized to create transaction for this reservation. You are not the owner of the karenderya.",
@@ -73,6 +73,11 @@ namespace TomNam.Services
             };
             await _transactionRepository.CreateTransaction(transaction);
             await _reservationService.UpdateReservationStatus(reservation.Id, "Paid");
+
+            var CustomerProfile = await _userService.GetCustomerProfileById(reservation.CustomerProfileId.ToString());
+
+            CustomerProfile!.BehaviorScore += 10;
+            await _userService.UpdateCustomerProfile(CustomerProfile);
             return transaction;
         }
 

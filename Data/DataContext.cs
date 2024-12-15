@@ -74,12 +74,18 @@ namespace TomNam.Data
                 .WithMany()
                 .HasForeignKey(r => r.KarenderyaId);
 
+
+            modelBuilder.Entity<Transaction>()
+                .HasOne(r => r.Reservation)
+                .WithMany()
+                .HasForeignKey(r => r.ReservationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<ReservedItem>()
                .HasOne(ri => ri.Reservation)
                .WithMany(r => r.ReservedItems)
                .HasForeignKey(ri => ri.ReservationId)
                .OnDelete(DeleteBehavior.Cascade);
-
 
             modelBuilder.Entity<ReservedItem>()
                 .HasOne(ri => ri.Food)

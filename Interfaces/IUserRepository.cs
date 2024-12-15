@@ -7,6 +7,8 @@ namespace TomNam.Interfaces{
 		Task<User> Create(User user, string password, string role);
 		Task<OwnerProfile?> GetOwnerProfile(string userId);
 		Task<CustomerProfile?> GetCustomerProfile(string userId);
+		Task<CustomerProfile?> GetCustomerProfileById(string CustomerProfileId);
 		Task UpdateOwnerProfile(OwnerProfile ownerProfile);
+		Task UpdateCustomerProfile(CustomerProfile CustomerProfile);
 	}
 }
